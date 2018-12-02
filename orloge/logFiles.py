@@ -514,9 +514,11 @@ class GUROBI(LogFile):
 
         get = re.search(r'\*?\s*\d+\+?\s*\d+\s*(infeasible|cutoff|integral)', line)
         if get is not None:
-            name = get.group(1)
-            args['obj'] = '({})'.format(name)
-            if name in ['cutoff', 'infeasible']:  # not sure about integral
+            state = get.group(1)
+            args['obj'] = '({})'.format(state)
+            if state in ['integral']:
+                pass
+            else:
                 args['iinf'] = '()'
 
         find = re.search(r'\s+{n}\s+{n_left}\s+{obj}\s+{depth}\s+{iinf}?\s+{b_int}?-?'
