@@ -4,9 +4,9 @@ There exist bigger, probably more robust libraries (IPET is the one that comes t
 
 The idea is just to provide a function like the following:
 
-  import orloge as ol
-  statistics = ol.get_info_log_solver(path, solver)
-  print(statistics)
+    import orloge as ol
+    statistics = ol.get_info_log_solver(path, solver)
+    print(statistics)
 
 That returns some standard dictionary with the relevant information. For example:
 
