@@ -11,3 +11,14 @@ LpSolutionOptimal = 1
 LpSolutionIntegerFeasible = 2
 LpSolutionInfeasible = -1
 LpSolutionUnbounded = -2
+
+solver_to_solution = \
+   {
+   LpStatusNotSolved : LpSolutionNoSolutionFound
+, LpStatusSolved : LpSolutionOptimal
+, LpStatusInfeasible  : LpSolutionInfeasible
+, LpStatusUnbounded   : LpSolutionUnbounded
+, LpStatusUndefined   : LpSolutionNoSolutionFound
+, LpStatusTimeLimit   : LpSolutionNoSolutionFound
+, LpStatusMemoryLimit : LpSolutionNoSolutionFound
+}

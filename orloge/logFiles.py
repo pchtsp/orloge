@@ -1,15 +1,10 @@
 # /usr/bin/python3
 import re
 import pandas as pd
-import io
 import numpy as np
 import orloge.constants as c
-import os
 
-
-# TODO: get version of solver
-
-def get_info_log_solver(path, solver):
+def get_info_solver(path, solver):
 
     if solver=='CPLEX':
         log = CPLEX(path)
@@ -37,6 +32,8 @@ class LogFile(object):
         self.numberSearch = r'({})'.format(self.number)
         self.wordSearch = r'([\w, ]+)'
         self.name = None
+        self.solver_status_map = {}
+        self.version_regex = ''
 
     def apply_regex(self, regex, content_type=None, first=True, pos=None, num=None, **kwargs):
         solution = re.findall(regex, self.content, **kwargs)
@@ -77,7 +74,7 @@ class LogFile(object):
                     ct[i] = c
             return [func[ct[i]](val) for i, val in enumerate(possible_tuple)]
 
-    def get_progress_general(self, names, regex_filter):
+    def get_progress_general(self, regex_filter):
         """
         :return: pandas dataframe with 8 columns
         """
@@ -89,8 +86,6 @@ class LogFile(object):
         processed = [self.process_line(line) for line in lines]
         processed_clean = [p for p in processed if p is not None]
         table = pd.DataFrame(processed_clean)
-        if len(table):
-            table.columns = names
         return table
 
     def get_first_results(self, progress):
@@ -99,7 +94,7 @@ class LogFile(object):
         if len(df_filter) > 0 and any(df_filter):
             first_relax = float(progress.CutsBestBound[df_filter].iloc[0])
 
-        df_filter = progress.BestInteger.str.match(r"^\s*{}$".format(self.number))
+        df_filter = progress.BestInteger.fillna('').str.match(r"^\s*{}$".format(self.number))
         if len(df_filter) > 0 and any(df_filter):
             first_solution = float(progress.BestInteger[df_filter].iloc[0])
         return first_relax, first_solution
@@ -110,64 +105,89 @@ class LogFile(object):
                             progress.NodesLeft.str.match(r"^\+?H?\s*[12]")),
                            axis=0)
         sol_value = relax_value = None
+
+        # we initialize with the last values:
         if len(progress.BestInteger) > 0:
             sol_value = progress.BestInteger.iloc[-1]
         if len(progress.CutsBestBound) > 0:
             relax_value = progress.CutsBestBound.iloc[-1]
 
-        sol_after_cuts = relax_after_cuts = None
+        # in case we have progress after cuts, we replace those defaults
         if np.any(df_filter):
             sol_value = progress.BestInteger[df_filter].iloc[0]
             relax_value = progress.CutsBestBound[df_filter].iloc[0]
-        if sol_value and re.search(r'\s*\d', sol_value):
-            sol_after_cuts = float(sol_value)
-        if relax_value and re.search(r'\s*\d', relax_value):
-            relax_after_cuts = float(relax_value)
-        return relax_after_cuts, sol_after_cuts
+
+        # finally, in either case, we return the found values
+        if sol_value and re.search(r'^\s*-?\d', sol_value):
+            sol_value = float(sol_value)
+        if relax_value and re.search(r'^\s*-?\d', relax_value):
+            relax_value = float(relax_value)
+
+        return relax_value, sol_value
 
     def get_log_info(self):
-        cons, vars, nonzeroes = self.get_matrix()
-        # cons, vars, nonzeroes = self.get_matrix_post()
-        objective, bound, gap_rel = self.get_objective()
-        status, sol_status = self.get_status()
-        # bound, gap_abs, gap_rel = self.get_gap()
+        version = self.get_version()
+        matrix = self.get_matrix_dict()
+        matrix_post = self.get_matrix_dict(post=True)
+        status, objective, bound, gap_rel = self.get_stats()
+        solver_status, solution_status = self.get_status_codes(status, objective)
         if bound is None:
             bound = objective
-        cuts = self.get_cuts()
-        cutsTime = self.get_cuts_time()
         presolve = self.get_lp_presolve()
         time_out = self.get_time()
         rootTime = self.get_root_time()
         progress = self.get_progress()
-        after_cuts = sol_after_cuts = None
         first_relax = first_solution = None
+        cut_info = self.get_cuts_dict(progress)
         if len(progress):
-            after_cuts, sol_after_cuts = self.get_results_after_cuts(progress)
             first_relax, first_solution = self.get_first_results(progress)
 
         return {
+            'version': version,
+            'solver': self.name,
             'status': status,
-            'bound_out': bound,
-            'objective_out': objective,
-            'gap_out': gap_rel,
-            'time_out': time_out,
-            'cons': cons,
-            'vars': vars,
-            'nonzeros': nonzeroes,
-            'cuts': cuts,
+            'best_bound': bound,
+            'best_solution': objective,
+            'gap': gap_rel,
+            'time': time_out,
+            'matrix_post': matrix_post,
+            'matrix': matrix,
+            'cut_info': cut_info,
             'rootTime': rootTime,
-            'cutsTime': cutsTime,
             'presolve': presolve,
             'first_relaxed': first_relax,
-            'after_cuts': after_cuts,
             'progress': progress,
             'first_solution': first_solution,
-            'sol_after_cuts': sol_after_cuts
+            'status_code': solver_status,
+            'sol_code': solution_status
         }
 
-    @staticmethod
-    def status_is_infeasible(status):
-        return re.search('infeasible', status) is not None
+    def get_cuts_dict(self, progress):
+        if not len(progress):
+            return None
+        cutsTime = self.get_cuts_time()
+        cuts = self.get_cuts()
+        after_cuts = sol_after_cuts = None
+        if len(progress):
+            after_cuts, sol_after_cuts = self.get_results_after_cuts(progress)
+        return {'time': cutsTime,
+                'cuts': cuts,
+                'relax': after_cuts,
+                'solution': sol_after_cuts
+                }
+
+    def get_matrix_dict(self, post=False):
+        if post:
+            cons, vars, nonzeroes = self.get_matrix_post()
+        else:
+            cons, vars, nonzeroes = self.get_matrix()
+        return {'constraints': cons,
+                'variables': vars,
+                'nonzeros': nonzeroes}
+
+
+    def get_version(self):
+        return self.apply_regex(self.version_regex)
 
     def get_matrix(self):
         return None, None, None
@@ -175,11 +195,18 @@ class LogFile(object):
     def get_matrix_post(self):
         return None, None, None
 
-    def get_objective(self):
-        return None, None, None
+    def get_stats(self):
+        return None, None, None, None
 
-    def get_status(self):
-        return None, None
+    def get_status_codes(self, status, obj):
+
+        solver_status = self.solver_status_map.get(status)
+        solution_status = c.solver_to_solution.get(solver_status)
+
+        if obj is not None and solution_status == c.LpSolutionNoSolutionFound:
+            solution_status = c.LpSolutionIntegerFeasible
+
+        return solver_status, solution_status
 
     def get_cuts(self):
         return None
@@ -204,45 +231,46 @@ class LogFile(object):
 
 
 class CPLEX(LogFile):
+    # Reference:
+    # https://www.ibm.com/support/knowledgecenter/SSSA5P_12.6.3/ilog.odms.cplex.help/CPLEX/UsrMan/topics/discr_optim/mip/para/52_node_log.html
 
     def __init__(self, path):
         super().__init__(path)
         self.name = 'CPLEX'
+        self.solver_status_map = {
+            "MIP - Integer optimal": c.LpStatusSolved,
+            "MIP - Integer infeasible.": c.LpStatusInfeasible,
+            "MIP - Time limit exceeded": c.LpStatusTimeLimit,
+            "MIP - Integer unbounded": c.LpStatusUnbounded,
+            "MIP - Integer infeasible or unbounded": c.LpStatusInfeasible,
+            "CPLEX Error  1001: Out of memory": c.LpStatusMemoryLimit,
+            "No file read": c.LpStatusNotSolved
+        }
+
+        self.version_regex = "^Welcome to IBM\(R\) ILOG\(R\) CPLEX\(R\) Interactive Optimizer (\S+)"
+
+    def get_stats(self):
+        status = self.get_status()
+        objective = self.get_objective()
+        bound, gap_abs, gap_rel = self.get_gap()
+        return status, objective, bound, gap_rel
+
+    def get_status(self):
+        for k in self.solver_status_map.keys():
+            search_string = re.escape(k)
+            if self.apply_regex(search_string):
+                return k
+                # return status, None, None, None
 
     def get_objective(self):
-        objective = self.get_best_solution()
-        bound, gap_abs, gap_rel = self.get_gap()
-        return objective, bound, gap_rel
-
-    # Reference:
-    # https://www.ibm.com/support/knowledgecenter/SSSA5P_12.6.3/ilog.odms.cplex.help/CPLEX/UsrMan/topics/discr_optim/mip/para/52_node_log.html
-    def get_best_solution(self):
         """
         :return: tuple of length 2
         """
-
-        regex = r'MIP\s+-\s+{1}(.*:\s+Objective\s+=\s+{0}\n)?'.format(self.numberSearch, self.wordSearch)
+        regex = r'Objective\s+=\s+{0}\n'.format(self.numberSearch)
         result = self.apply_regex(regex, flags=re.MULTILINE)
-        obj = None
         if result is not None:
-            if result[2] != '':
-                obj = float(result[2])
-        return obj
-
-    def get_status(self):
-        # TODO: this
-        solverstatusmap = {"MIP - Integer optimal": c.LpStatusSolved,
-                           "MIP - Integer infeasible\.": c.LpStatusSolved,
-                           "MIP - Time limit exceeded": c.LpStatusTimeLimit,
-                           "MIP - Integer unbounded": c.LpStatusUnbounded,
-                           "MIP - Integer infeasible or unbounded.": c.LpStatusInfeasible,
-                           "CPLEX Error  1001: Out of memory\.": c.LpStatusMemoryLimit,
-                           "No file read\.": c.LpStatusNotSolved,
-
-                           #                       "" : Key.SolverStatusCodes.NodeLimit,
-                           #                       "" : Key.SolverStatusCodes.Interrupted
-                           }
-        return None, None
+            result = float(result)
+        return result
 
     def get_gap(self):
         """
@@ -314,33 +342,39 @@ class CPLEX(LogFile):
         args = {k: self.numberSearch for k in keys}
         args['gap'] = '({}%)'.format(self.number)
 
-        if line[0] in ['*']:
-            args['obj'] = '(integral)'
-            args['iinf'] = '()'
-
-        if re.search(r'\*\s*\d+\+', line):
+        if re.search('\*\s*\d+\+', line):
             args['obj'] = '()'
             args['ItCnt'] = '()'
+            args['iinf'] = '()'
 
-        if re.search(r'Cuts: \d+', line):
-            args['b_bound'] = r'(Cuts: \d+)'
+        if re.search('Cuts: \d+', line):
+            args['b_bound'] = '(Cuts: \d+)'
 
-        get = re.search(r'\*?\s*\d+\+?\s*\d+\s*(infeasible|cutoff|integral)', line)
+        get = re.search('\*?\s*\d+\+?\s*\d+\s*(infeasible|cutoff)', line)
         if get is not None:
             args['obj'] = '({})'.format(get.group(1))
+            args['iinf'] = '()'
 
-        find = re.search(r'\s+{n}\s+{n_left}\s+{obj}\s+{iinf}?\s+{b_int}?\s+{b_bound}\s+{ItCnt}\s+{gap}?'. \
+        get = re.search('\*?\s*\d+\+?\s*\d+\s*(integral)', line)
+        if get is not None:
+            args['obj'] = '(integral)'
+            args['iinf'] = '(0)'
+
+
+        find = re.search('\s+{n}\s+{n_left}\s+{obj}\s+{iinf}?\s+{b_int}?\s+{b_bound}\s+{ItCnt}\s+{gap}?'. \
                          format(**args), line)
         if not find:
-            #
             return None
         return find.groups()
 
     def get_progress(self):
         name_width = [('Node', 7), ('NodesLeft', 6), ('Objective', 14), ('IInf', 4), ('BestInteger', 11),
-                      ('CutsBestBound', 11), ('Gap', 7), ('ItpNode', 6)]
+                      ('CutsBestBound', 11), ('ItpNode', 6), ('Gap', 7)]
         names = [k[0] for k in name_width]
-        return self.get_progress_general(names, regex_filter = r'(^[\*H]?\s+\d.*$)')
+        progress = self.get_progress_general(regex_filter = r'(^[\*H]?\s+\d.*$)')
+        if len(progress):
+            progress.columns = names
+        return progress
 
 
 class GUROBI(LogFile):
@@ -348,6 +382,18 @@ class GUROBI(LogFile):
     def __init__(self, path):
         super().__init__(path)
         self.name = 'GUROBI'
+        self.solver_status_map =  \
+            {"Optimal solution found": c.LpStatusSolved,
+             'Solved with barrier': c.LpStatusSolved,
+             "Model is infeasible": c.LpStatusInfeasible,
+             "Model is infeasible or unbounded": c.LpStatusInfeasible,
+             "Time limit reached": c.LpStatusTimeLimit,
+             "Out of memory": c.LpStatusMemoryLimit,
+             'ERROR 10001': c.LpStatusMemoryLimit,
+             "ERROR 10003": c.LpStatusNotSolved,
+             "^Model is unbounded": c.LpStatusUnbounded,
+             }
+        self.version_regex = "Gurobi Optimizer version (\S+)"
 
     def get_cuts(self):
         regex = r'Cutting planes:([\n\s\w:]+)Explored'  # gurobi
@@ -361,7 +407,10 @@ class GUROBI(LogFile):
         name_width = [('Node', 7), ('NodesLeft', 6), ('Objective', 14), ('Depth', 2), ('IInf', 4), ('BestInteger', 11),
                       ('CutsBestBound', 11), ('Gap', 7), ('ItpNode', 6), ('Time', 6)]
         names = [k[0] for k in name_width]
-        return self.get_progress_general(names, regex_filter = r'(^[\*H]?\s+\d.*$)')
+        progress = self.get_progress_general(regex_filter = r'(^[\*H]?\s+\d.*$)')
+        if len(progress):
+            progress.columns = names
+        return progress
 
     def get_matrix(self):
         regex = r'Optimize a model with {0} rows, {0} columns and {0} nonzeros'.format(self.numberSearch)
@@ -369,33 +418,23 @@ class GUROBI(LogFile):
 
     def get_matrix_post(self):
         regex = r'Presolved: {0} rows, {0} columns, {0} nonzeros'.format(self.numberSearch)
-        return self.apply_regex(regex, content_type="int")
+        result = self.apply_regex(regex, content_type="int")
+        if result is None:
+            return (None for i in range(3))
+        return result
 
-    def get_objective(self):
+    def get_stats(self):
         regex = r'{1}( \(.*\))?\nBest objective ({0}|-), best bound ({0}|-), gap ({0}|-)'.\
             format(self.numberSearch,self.wordSearch)
         # content_type = ['', '', 'float', 'float', 'float']
         solution = self.apply_regex(regex)
         if solution is None:
-            return None, None, None
+            return None, None, None, None
 
+        status = solution[0]
         objective, bound, gap_rel = \
             [float(solution[pos]) if solution[pos] != '-' else None for pos in [2, 4, 6]]
-        return objective, bound, gap_rel
-
-    def get_status(self):
-        # TODO: this
-        solverstatusmap = {"(Optimal solution found|Solved with barrier)": c.LpStatusSolved,
-                           "Model is infeasible$": c.LpStatusInfeasible,
-                           "Model is infeasible or unbounded": c.LpStatusInfeasible,
-                           "Time limit reached": c.LpStatusTimeLimit,
-                           "^(ERROR 10001|Out of memory)": c.LpStatusMemoryLimit,
-                           #                       "" : Key.SolverStatusCodes.NodeLimit,
-                           #                       "" : Key.SolverStatusCodes.Interrupted
-                           "^ERROR 10003": c.LpStatusNotSolved,
-                           "^Model is unbounded": c.LpStatusUnbounded,
-                           }
-        return None, None
+        return status, objective, bound, gap_rel
 
     def get_cuts_time(self):
         progress = self.get_progress()
@@ -470,6 +509,16 @@ class CBC(LogFile):
     def __init__(self, path):
         super().__init__(path)
         self.name = 'CBC'
+        self.solver_status_map = {
+            "Optimal solution found": c.LpStatusSolved,
+            'Problem is infeasible': c.LpStatusInfeasible,
+            "Stopped on time limit": c.LpStatusTimeLimit,
+            "Problem proven infeasible": c.LpStatusInfeasible,
+            "Problem is unbounded": c.LpStatusUnbounded,
+            "Pre-processing says infeasible or unbounded": c.LpStatusInfeasible,
+            "** Current model not valid": c.LpStatusNotSolved
+        }
+        self.version_regex = "^Version: (\S+)"
 
     def get_cuts(self):
         # TODO
@@ -477,11 +526,17 @@ class CBC(LogFile):
 
     def get_progress(self):
         names = ['Node', 'NodesLeft', 'BestInteger', 'CutsBestBound', 'Time']
-        return self.get_progress_general(names, regex_filter=r'(^Cbc0010I.*$)')
+        progress = self.get_progress_general(regex_filter=r'(^Cbc0010I.*$)')
+        if len(progress):
+            progress.columns = names
+        return progress
 
     def get_matrix(self):
-        regex = r'Problem MODEL has {0} rows, {0} columns and {0} elements'.format(self.numberSearch)
-        return self.apply_regex(regex, content_type="int")
+        regex = r'Problem .+ has {0} rows, {0} columns and {0} elements'.format(self.numberSearch)
+        result = self.apply_regex(regex, content_type="int")
+        if result is None:
+            return (None for i in range(3))
+        return result
 
     def get_matrix_post(self):
         regex = r'Cgl0004I processed model has {0} rows, {0} columns \(\d+ integer ' \
@@ -492,42 +547,39 @@ class CBC(LogFile):
         pass
         # version_expr = re.compile("^Version: (\S+)")
 
-    def get_status(self):
-        # TODO: this
-        solverstatusmap = {"Result - Optimal solution found": c.LpStatusSolved,
-                           'Problem is infeasible': c.LpStatusInfeasible,
-                           "Result - Stopped on time limit": c.LpStatusTimeLimit,
-                           "Result - Problem proven infeasible": c.LpStatusInfeasible,
-                           "Problem is unbounded": c.LpStatusUnbounded,
-                           "Pre-processing says infeasible or unbounded": c.LpStatusInfeasible,
-                           "\*\* Current model not valid": c.LpStatusNotSolved
-                           }
+    def get_stats(self):
+
         regex = 'Result - {}'.format(self.wordSearch)
         status = self.apply_regex(regex, pos=0)
         if status is None:
-            if self.apply_regex('Problem is infeasible'):
-                status = 'Problem is infeasible'
-                return status, None
-        return None, None
-
-    def get_objective(self):
-
-        regex = r'best objective {0}( \(best possible {0}\))?, took {1} iterations and {1} nodes \({1} seconds\)'.\
+            # no solution found, I still want the status
+            for k in self.solver_status_map.keys():
+                search_string = re.escape(k)
+                if self.apply_regex(search_string):
+                    status = search_string
+                    return status, None, None, None
+        regex = 'best objective {0}( \(best possible {0}\))?, took {1} iterations and {1} nodes \({1} seconds\)'.\
             format(self.numberSearch, self.number)
         solution = self.apply_regex(regex)
 
         if solution is None:
-            return None, None, None
+            return None, None, None, None
 
-        objective = float(solution[0])
+        if solution[0] == '1e+50':
+            objective = None
+        else:
+            objective = float(solution[0])
+
         if solution[2] is None or solution[2] == '':
             bound = objective
         else:
             bound = float(solution[2])
 
-        gap_rel = abs(objective - bound) / objective * 100
+        gap_rel = None
+        if objective is not None:
+            gap_rel = abs(objective - bound) / objective * 100
 
-        return objective, bound, gap_rel
+        return status, objective, bound, gap_rel
 
     def get_cuts_time(self):
         # TODO
@@ -538,7 +590,7 @@ class CBC(LogFile):
         return None
 
     def get_time(self):
-        regex = r'Time \(Wallclock seconds\):\s*{}'.format(self.numberSearch)
+        regex = r'Total time \(CPU seconds\):\s*{}'.format(self.numberSearch)
         stats = self.apply_regex(regex, content_type='float', pos=0)
         return stats
 
@@ -559,42 +611,5 @@ class CBC(LogFile):
 
 
 if __name__ == "__main__":
-    import pprint as pp
-    import package.params as pm
-    route = '/home/pchtsp/Documents/projects/OPTIMA_documents/results/experiments/'
-    # path = '/home/pchtsp/Documents/projects/OPTIMA_documents/results/experiments/201801102259/results.log'
-    # path = '/home/pchtsp/Documents/projects/OPTIMA_documents/results/experiments/201801141334/results.log'
-    # path = '/home/pchtsp/Documents/projects/OPTIMA_documents/results/experiments/201801131817/results.log'
-    # path = "/home/pchtsp/Documents/projects/OPTIMA_documents/results/experiments/201801141331/results.log"
-    exps = ['201801102259', '201801141334', '201801131817', '201801141331']
 
-    exps = ['201801141705']
-    # exps = ['201801102259']
-    # for e in exps:
-    #     path = os.path.join(route, e, 'results.log')
-    #     log = LogFile(path)
-    #     result = log.get_log_info_cplex()
-    #     pp.pprint(result)
-    #
-    # re.search(r"\s*\d", result.CutsBestBound[1])
-    # cplex tests
-    path = pm.PATHS['results'] + 'hp_20181025/task_periods_minusage_pricerutend_respertask_1_90_0_0_15/201810252139/results.log'
-    path = pm.PATHS['results'] + 'hp_20181025/task_periods_minusage_pricerutend_respertask_1_90_0_1_15/201810260322/results.log'
-    path = pm.PATHS['results'] + 'clust1_20181024/task_periods_minusage_pricerutend_respertask_1_60_20_1_15/201810261129/results.log'
-    # log = CPLEX(path)
-
-    # gurobi tests
-    path = pm.PATHS['results'] + 'clust1_20181112/base/201811140123/results.log'
-    # path = pm.PATHS['results'] + 'clust1_20181112/maxusedtime_800/201811130631_1/results.log'
-    # path = pm.PATHS['results'] + 'clust1_20181112/maxusedtime_800/201811130130/results.log'
-    # log = GUROBI(path)
-
-    # cbc tests
-    path = pm.PATHS['results'] + 'hp_20181114/base/201811180430/results.log'
-    # path = '/home/pchtsp/Dropbox/OPTIMA_results/hp_20181025/task_periods_minusage_pricerutend_respertask_1_90_0_0_15/201810252139_1/results.log'
-    # info = log.get_log_info_cplex()
-    log = CBC(path)
-
-    info = log.get_log_info()
-    info['status']
-    # status, objective = log.get_objective()
+    pass
