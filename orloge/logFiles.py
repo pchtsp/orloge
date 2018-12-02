@@ -386,15 +386,14 @@ class CPLEX(LogFile):
         if re.search(r'Cuts: \d+', line):
             args['b_bound'] = r'(Cuts: \d+)'
 
-        get = re.search(r'\*?\s*\d+\+?\s*\d+\s*(infeasible|cutoff)', line)
+        get = re.search(r'\*?\s*\d+\+?\s*\d+\s*(infeasible|cutoff|integral)', line)
         if get is not None:
-            args['obj'] = '({})'.format(get.group(1))
-            args['iinf'] = '()'
-
-        get = re.search(r'\*?\s*\d+\+?\s*\d+\s*(integral)', line)
-        if get is not None:
-            args['obj'] = '(integral)'
-            args['iinf'] = '(0)'
+            state = get.group(1)
+            args['obj'] = '({})'.format(state)
+            if state in ['integral']:
+                args['iinf'] = '(0)'
+            else:
+                args['iinf'] = '()'
 
         find = re.search(r'\s+{n}\s+{n_left}\s+{obj}\s+{iinf}?\s+{b_int}?\s+{b_bound}\s+{ItCnt}\s+{gap}?'.
                          format(**args), line)
