@@ -27,7 +27,7 @@ This returns a python dictionary with a lot of information from the log (see *Ex
 
 or, for the development version:
 
-    git+https://github.com/pchtsp/orloge
+    pip install https://github.com/pchtsp/orloge/archive/master.zip
 
 ## Testing
 
