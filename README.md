@@ -1,16 +1,79 @@
-The idea of this project is to permit a fast and easy parsing of the log files from different solvers, specifically 'operations research' (OR) logs (the reason for the name).
+The idea of this project is to permit a fast and easy parsing of the log files from different solvers, specifically 'operations research' (OR) logs.
 
-There exist bigger, probably more robust libraries (IPET is the one that comes to mind) but it deals with too many things and I found it kind of hard to use to build something on top.
+There exist bigger, and more robust libraries. In particular, [IPET](https://github.com/GregorCH/ipet/). The trouble I had was that it deals with too many benchmarking and GUI things and I wanted something simple I could modify and build on top.
 
-The idea is just to provide a function like the following:
+In any case, a lot of the ideas and parsing strings were obtained or adapted from IPET, to whom I am graceful.
 
-  import orloge as ol
-  statistics = ol.get_info_log_solver(path, solver)
-  print(statistics)
+The supported solvers for the time being are: GUROBI, CPLEX and CBC. Specially the two first ones.
 
-That returns some standard dictionary with the relevant information. For example:
+The basic idea is just to provide a unique interface function like the following:
 
-<!-- TODO -->
+    import orloge as ol
+    statistics = ol.get_info_log_solver(path, solver)
+    print(statistics)
+
+That returns some standard dictionary with the relevant information. 
+For example in CBC:
+
+    {'best_bound': -96.111283,
+     'best_solution': None,
+     'cut_info': {'best_bound': -210.09571,
+                  'best_solution': 1e+50,
+                  'cuts': None,
+                  'time': None},
+     'first_relaxed': -210.09571,
+     'first_solution': 1e+50,
+     'gap': None,
+     'matrix': {'constraints': 53467, 'nonzeros': 199175, 'variables': 26871},
+     'matrix_post': {'constraints': 26555, 'nonzeros': 195875, 'variables': 13265},
+     'nodes': 31867,
+     'presolve': None,
+     'progress':       
+     Node NodesLeft BestInteger CutsBestBound     Time
+    0        0         1       1e+50    -210.09571    32.83
+    1      100        11       1e+50    -210.09571   124.49
+    ..     ...       ...         ...           ...      ...
+    [319 rows x 5 columns],
+     'rootTime': None,
+     'sol_code': 0,
+     'solver': 'CBC',
+     'status': 'Stopped on time limit',
+     'status_code': -4,
+     'time': 7132.49,
+     'version': '2.9.8'}
+
+An example for GUROBI would be:
+
+    {'best_bound': -41.0,
+     'best_solution': -41.0,
+     'cut_info': {'best_bound': -167.97894,
+                  'best_solution': -41.0,
+                  'cuts': {'Clique': 1,
+                           'Gomory': 16,
+                           'Implied bound': 23,
+                           'MIR': 22},
+                  'time': 21.0},
+     'first_relaxed': -178.94318,
+     'first_solution': -41.0,
+     'gap': 0.0,
+     'matrix': {'constraints': 53467, 'nonzeros': 199175, 'variables': 26871},
+     'matrix_post': {'constraints': 35616, 'nonzeros': 149085, 'variables': 22010},
+     'nodes': 526.0,
+     'presolve': {'cols': 4861, 'rows': 17851, 'time': 3.4},
+     'progress':    Node NodesLeft   Objective Depth ...  CutsBestBound    Gap ItpNode Time
+    0     0         0  -178.94318     0 ...     -178.94318   336%    None   4s
+    1     0         0  -171.91701     0 ...     -171.91701   319%    None  15s
+    2     0         0  -170.97660     0 ...     -170.97660   317%    None  15s
+    [26 rows x 10 columns],
+     'rootTime': 0.7,
+     'sol_code': 1,
+     'solver': 'GUROBI',
+     'status': 'Optimal solution found',
+     'status_code': 1,
+     'time': 46.67,
+     'version': '7.0.0'}
+
+Parsing the complete progress table helps anyone who later wants to analyze the raw solution process. I've tried to use the status codes and solution codes present in [PuLP](https://github.com/coin-or/pulp).
 
 # Installation
 
