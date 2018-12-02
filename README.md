@@ -5,10 +5,6 @@ There exist bigger, and more robust libraries. In particular, [IPET](https://git
 In any case, a lot of the ideas and parsing strings were obtained or adapted from IPET, to whom I am graceful.
 
 The supported solvers for the time being are: GUROBI, CPLEX and CBC. Specially the two first ones.
-The idea is just to provide a function like the following:
-    import orloge as ol
-    statistics = ol.get_info_log_solver(path, solver)
-    print(statistics)
 
 The basic idea is just to provide a unique interface function like the following:
 
