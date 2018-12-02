@@ -1,3 +1,5 @@
+## What and why
+
 The idea of this project is to permit a fast and easy parsing of the log files from different solvers, specifically 'operations research' (OR) logs.
 
 There exist bigger, and more robust libraries. In particular, [IPET](https://github.com/GregorCH/ipet/). The trouble I had was that it deals with too many benchmarking and GUI things and I wanted something simple I could modify and build on top.
@@ -6,14 +8,14 @@ In any case, a lot of the ideas and parsing strings were obtained or adapted fro
 
 The supported solvers for the time being are: GUROBI, CPLEX and CBC. Specially the two first ones.
 
+## How
+
 The basic idea is just to provide a unique interface function like the following:
 
     import orloge as ol
-    statistics = ol.get_info_log_solver(path, solver)
-    print(statistics)
+    ol.get_info_log_solver('tests/data/cbc298-app1-2.out', 'CBC')
 
-That returns some standard dictionary with the relevant information. 
-For example in CBC:
+Would produce the following:
 
     {'best_bound': -96.111283,
      'best_solution': None,
@@ -42,7 +44,12 @@ For example in CBC:
      'time': 7132.49,
      'version': '2.9.8'}
 
-An example for GUROBI would be:
+And another example, this time using GUROBI:
+
+    import orloge as ol
+    ol.get_info_log_solver('tests/data/gurobi700-app1-2.out', 'GUROBI')
+
+Creates the following output:
 
     {'best_bound': -41.0,
      'best_solution': -41.0,
@@ -60,7 +67,8 @@ An example for GUROBI would be:
      'matrix_post': {'constraints': 35616, 'nonzeros': 149085, 'variables': 22010},
      'nodes': 526.0,
      'presolve': {'cols': 4861, 'rows': 17851, 'time': 3.4},
-     'progress':    Node NodesLeft   Objective Depth ...  CutsBestBound    Gap ItpNode Time
+     'progress':    
+     Node NodesLeft   Objective Depth ...  CutsBestBound    Gap ItpNode Time
     0     0         0  -178.94318     0 ...     -178.94318   336%    None   4s
     1     0         0  -171.91701     0 ...     -171.91701   319%    None  15s
     2     0         0  -170.97660     0 ...     -170.97660   317%    None  15s
@@ -86,3 +94,29 @@ Run the command
     python -m unittest test
 
  if the output says OK, all tests were passed.
+
+## Reference
+
+### Main parameters
+
+The most common parameters to extract are: `best_bound`, `best_solution` and `time`. These three parameters are obtained at the end of the solving process and summarize the best relaxed objective value obtained, the best integer objective value obtained and the time it took to do the solving.
+
+### Cuts
+
+The cuts information can be accessed by the `cuts_info` key. It offers the best known bound after the cut phase has ended, the best solution (if any) after the cuts and the number of cuts made of each type.
+
+### Matrix
+
+There are two matrices that are provided. The `matrix` key returns the number of variables, constraints and non-zero values before the pre-processing of the solver. The `matrix_post` key returns these same values after the pre-processing has been done.
+
+### Progress
+
+The `progress` key returns a raw pandas Dataframe with the all the progress information the solver gives. Including the times, the gap, the best bound, the best solution, the iterations, nodes, among other. This table can vary in number of columns between solvers but the names of the columns are normalized so as to have the same name for the same information.
+
+### Status
+
+The status is given in several ways. First, a raw string extraction is returned in `status`. Then, a normalized one using codes is given via `sol_code` and `status_code` keys. `sol_code` gives information about the quality of the solution obtained. `status_code` gives details about the status of the solver after finishing (mainly, the reason it stopped).
+
+### Other
+
+There is also information about the pre-solving phase, the first bound and the first solution. Also, there's information about the time it took to solve the root node.
