@@ -1,4 +1,6 @@
 ## Orloge
+[![Build Status](https://travis-ci.org/pchtsp/orloge.svg?branch=master)](https://travis-ci.org/pchtsp/orloge)
+
 
 ## What and why
 
@@ -21,7 +23,11 @@ This returns a python dictionary with a lot of information from the log (see *Ex
 
 ## Installation
 
-    pip install git+https://github.com/pchtsp/
+    pip install orloge
+
+or, for the development version:
+
+    git+https://github.com/pchtsp/orloge
 
 ## Testing
 

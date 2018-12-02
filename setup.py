@@ -3,8 +3,10 @@
 from setuptools import setup
 
 packages = ['orloge']
-
 requirementslist = ['requirements.txt']
+
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
 required = []
 for r in requirementslist:
@@ -14,10 +16,11 @@ for r in requirementslist:
 
 kwargs = {
     "name": "orloge",
-    "version": 0.1,
+    "version": 0.11,
     "packages": packages,
-    "description": "OR log evaluator",
-    "long_description": "Operations Research log extractor",
+    "description": "OR log extractor",
+    "long_description": long_description,
+    'long_description_content_type': "text/markdown",
     "author": "Franco Peschiera",
     "maintainer": "Franco Peschiera",
     "author_email": "pchtsp@gmail.com",
