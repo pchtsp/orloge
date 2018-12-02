@@ -187,7 +187,51 @@ class SolverTest(unittest.TestCase):
                     'sol_code': c.LpSolutionOptimal,
                     'best_solution': 4.4300000000e+02,
                     'best_bound': 4.4300000000e+02},
-                "gurobi700-app1-2": {
+        "cplex1280-fmpFP1": {
+            'solver': "CPLEX",
+            'time': 3605.16,
+            'nodes': 28959,
+            'status_code': c.LpStatusTimeLimit,
+            'sol_code': c.LpSolutionIntegerFeasible,
+            'matrix': {
+                'constraints': 26699,
+                'variables': 17492,
+                'nonzeros': 248822
+            },
+            'matrix_post': {
+                'constraints': 24199,
+                'variables': 16436,
+                'nonzeros': 200919
+            },
+            'cut_info': {
+                'cuts': {
+                    'GUB cover': 14
+                    , 'Clique': 22
+                    , 'Cover': 13
+                    , 'Implied bound': 421
+                    , 'Flow': 86
+                    , 'Mixed integer rounding': 286
+                    , 'Zero-half': 199
+                    , 'Lift and project': 17
+                    , 'Gomory fractional': 49
+                },
+                'time': 64.88,
+                'best_bound': 75033.0540,
+                'best_solution': None
+            },
+            'best_solution': 7.8045498368e+04,
+            'best_bound': 7.5036256250e+04},
+        "cplex1280-fmpFP3": {
+            'solver': "CPLEX",
+            'time': 0.17,
+            'nodes': 0,
+            'status_code': c.LpStatusInfeasible,
+            'sol_code': c.LpSolutionInfeasible,
+            'matrix': None,
+            'matrix_post': None,
+            'cut_info': None
+        },
+        "gurobi700-app1-2": {
                     'solver': "GUROBI",
                     'time': 46.67,
                     'nodes': 526,

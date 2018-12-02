@@ -1,0 +1,51 @@
+
+Log started (V12.8.0.0) Sun Nov 25 22:00:03 2018
+
+New value for time limit in seconds: 3600
+New value for mixed integer optimality gap tolerance: 0
+New value for upper limit on size of tree in megabytes: 64413.2
+CPXPARAM_TimeLimit                               3600
+CPXPARAM_MIP_Tolerances_MIPGap                   0
+CPXPARAM_MIP_Limits_TreeMemory                   64413.1875
+Row '_C41516' implies binary variable 'start_M_('6',_'2018_01')' is negative.
+Presolve time = 0.16 sec. (147.80 ticks)
+
+Root node processing (before b&c):
+  Real time             =    0.17 sec. (152.97 ticks)
+Parallel b&c, 12 threads:
+  Real time             =    0.00 sec. (0.00 ticks)
+  Sync time (average)   =    0.00 sec.
+  Wait time (average)   =    0.00 sec.
+                          ------------
+Total (root+branch&cut) =    0.17 sec. (152.97 ticks)
+
+
+MIP - Integer infeasible.
+Current MIP best bound =  0.0000000000e+00 (gap is infinite)
+Solution time =    0.17 sec.  Iterations = 0  Nodes = 0
+Deterministic time = 152.99 ticks  (887.62 ticks/sec)
+
+CPLEX Error  1217: No solution exists.
+No changes made.
+CPXPARAM_TimeLimit                               3600
+CPXPARAM_MIP_Tolerances_MIPGap                   0
+CPXPARAM_MIP_Limits_TreeMemory                   64413.1875
+
+Root node processing (before b&c):
+  Real time             =    0.00 sec. (0.00 ticks)
+Parallel b&c, 12 threads:
+  Real time             =    0.00 sec. (0.00 ticks)
+  Sync time (average)   =    0.00 sec.
+  Wait time (average)   =    0.00 sec.
+                          ------------
+Total (root+branch&cut) =    0.00 sec. (0.00 ticks)
+
+
+MIP - Integer infeasible.
+Current MIP best bound =  0.0000000000e+00 (gap is infinite)
+Solution time =    0.00 sec.  Iterations = 0  Nodes = 0
+Deterministic time = 0.00 ticks  (0.53 ticks/sec)
+
+
+CPLEX Error  1217: No solution exists.
+No file written.

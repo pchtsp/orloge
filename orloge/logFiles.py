@@ -189,16 +189,18 @@ class LogFile(object):
     def get_matrix_dict(self, post=False):
         """
         wrapper to both matrix parsers (before and after the preprocess)
-        :return: a dicionary with three elements
+        :return: a dictionary with three elements or None
         """
         if post:
-            cons, vars, nonzeroes = self.get_matrix_post()
+            matrix = self.get_matrix_post()
         else:
-            cons, vars, nonzeroes = self.get_matrix()
-        return {'constraints': cons,
-                'variables': vars,
-                'nonzeros': nonzeroes}
+            matrix = self.get_matrix()
 
+        if matrix is None:
+            return None
+
+        order = ['constraints', 'variables', 'nonzeros']
+        return {k: matrix[p] for p, k in enumerate(order)}
 
     def get_version(self):
         """
@@ -207,10 +209,10 @@ class LogFile(object):
         return self.apply_regex(self.version_regex)
 
     def get_matrix(self):
-        return None, None, None
+        return None
 
     def get_matrix_post(self):
-        return None, None, None
+        return None
 
     def get_stats(self):
         return None, None, None, None
@@ -323,20 +325,14 @@ class CPLEX(LogFile):
         :return: tuple of length 3
         """
         regex = r'Reduced MIP has {0} rows, {0} columns, and {0} nonzeros'.format(self.numberSearch)
-        result = self.apply_regex(regex, content_type="int", num=0)
-        if result is None:
-            return None, None, None
-        return result
+        return self.apply_regex(regex, content_type="int", num=0)
 
     def get_matrix_post(self):
         """
         :return: tuple of length 3
         """
         regex = r'Reduced MIP has {0} rows, {0} columns, and {0} nonzeros'.format(self.numberSearch)
-        result = self.apply_regex(regex, content_type="int", num=-1)
-        if result is None:
-            return None, None, None
-        return result
+        return self.apply_regex(regex, content_type="int", num=-1)
 
     def get_cuts(self):
         """
@@ -442,10 +438,7 @@ class GUROBI(LogFile):
 
     def get_matrix_post(self):
         regex = r'Presolved: {0} rows, {0} columns, {0} nonzeros'.format(self.numberSearch)
-        result = self.apply_regex(regex, content_type="int")
-        if result is None:
-            return (None for i in range(3))
-        return result
+        return self.apply_regex(regex, content_type="int")
 
     def get_stats(self):
         regex = r'{1}( \(.*\))?\nBest objective ({0}|-), best bound ({0}|-), gap ({0}|-)'.\
@@ -559,10 +552,7 @@ class CBC(LogFile):
 
     def get_matrix(self):
         regex = r'Problem .+ has {0} rows, {0} columns and {0} elements'.format(self.numberSearch)
-        result = self.apply_regex(regex, content_type="int")
-        if result is None:
-            return (None for i in range(3))
-        return result
+        return self.apply_regex(regex, content_type="int")
 
     def get_matrix_post(self):
         regex = r'Cgl0004I processed model has {0} rows, {0} columns \(\d+ integer ' \
