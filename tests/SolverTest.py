@@ -15,8 +15,9 @@ class SolverTest(unittest.TestCase):
     fileinfo = {
                 "cbc298-app1-2": {
                     'solver': "CBC",
+                    'version': '2.9.8',
                     'time': 7132.49,
-                    'nodes': 31867,  # TODO: nodes
+                    'nodes': 31867,
                     'status_code': c.LpStatusTimeLimit,
                     'sol_code': c.LpSolutionNoSolutionFound,
                     'best_solution': None,
@@ -27,6 +28,16 @@ class SolverTest(unittest.TestCase):
                     'nodes': 0,
                     'status_code': c.LpStatusInfeasible,
                     'sol_code': c.LpSolutionInfeasible,
+                    'matrix': {
+                        'constraints': 24748,
+                        'variables': 3651,
+                        'nonzeros': 74244
+                    },
+                    'matrix_post': {
+                        'constraints': 18352,
+                        'variables': 3651,
+                        'nonzeros': 58254
+                    },
                     'best_solution': None,
                     'best_bound': None},
                 "cbc298-bab5": {
@@ -63,6 +74,7 @@ class SolverTest(unittest.TestCase):
                     'best_bound':-5},
                 "cplex1271-app1-2": {
                     'solver': "CPLEX",
+                    'version': '12.7.1.0',
                     'nodes': 1415,
                     'status_code': c.LpStatusSolved,
                     'sol_code': c.LpSolutionOptimal,
@@ -140,6 +152,31 @@ class SolverTest(unittest.TestCase):
                     'nodes': 3896,
                     'status_code': c.LpStatusSolved,
                     'sol_code': c.LpSolutionOptimal,
+                    'matrix': {
+                        'constraints': 4658,
+                        'variables': 7759,
+                        'nonzeros': 50343
+                    },
+                    'matrix_post': {
+                        'constraints': 4214,
+                        'variables': 7088,
+                        'nonzeros': 45547
+                    },
+                    'cut_info': {
+                        'cuts': {
+                            'GUB cover': 2
+                            , 'Clique': 7
+                            , 'Cover': 5
+                            , 'Implied bound': 21
+                            , 'Flow': 5
+                            , 'Mixed integer rounding': 19
+                            , 'Zero-half': 18
+                            , 'Gomory fractional': 2
+                        },
+                        'time': 4.42,
+                        'best_bound': -20,
+                        'best_solution': 45
+                    },
                     'best_solution': -5.0000000000e+00,
                     'best_bound': -5.0000000000e+00},
                 "cplex1280-tanglegram2": {
@@ -156,6 +193,16 @@ class SolverTest(unittest.TestCase):
                     'nodes': 526,
                     'status_code': c.LpStatusSolved,
                     'sol_code': c.LpSolutionOptimal,
+                    'matrix': {
+                        'constraints': 53467,
+                        'variables': 26871,
+                        'nonzeros': 199175
+                    },
+                    'matrix_post': {
+                        'constraints': 35616,
+                        'variables': 22010,
+                        'nonzeros': 149085
+                    },
                     'best_solution':-41,
                     'best_bound':-41},
                 "gurobi700-bab5": {
@@ -231,6 +278,22 @@ class SolverTest(unittest.TestCase):
                     'time': 0.57,
                     'nodes': 1,
                     'status_code': c.LpStatusSolved,
+                    'matrix': {
+                        'constraints': 8980,
+                        'variables': 4714,
+                        'nonzeros': 26940
+                    },
+                    'matrix_post': {
+                        'constraints': 7976,
+                        'variables': 4058,
+                        'nonzeros': 23928
+                    },
+                    'cut_info': {
+                        'cuts': {'Zero half': 5},
+                        'time': 0,
+                        'best_bound': 443,
+                        'best_solution': 443
+                    },
                     'best_solution': 4.430000000000e+02,
                     'best_bound': 4.430000000000e+02},
                 # "xpress300103-app1-2": {
@@ -555,6 +618,7 @@ class SolverTest(unittest.TestCase):
             data = ol.logFiles.get_info_solver(file, solver)
             for key, value in contents.items():
                 if key not in data:
+                    print("not checking: {} in {}".format(key, filename))
                     continue
                 msg = "{0} has {1} as {2}, should be {3}". format(filename, data[key], key, value)
                 if key in ALMOST_KEYS:
