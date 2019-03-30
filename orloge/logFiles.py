@@ -567,10 +567,10 @@ class CBC(LogFile):
         if status is None:
             # no solution found, I still want the status
             for k in self.solver_status_map.keys():
-                search_string = re.escape(k)
-                if self.apply_regex(search_string):
-                    status = search_string
-                    return status, None, None, None
+                if self.apply_regex(re.escape(k)):
+                    return k, None, None, None
+        else:
+            status = status.strip()
         regex = r'best objective {0}( \(best possible {0}\))?, took {1} iterations and {1} nodes \({1} seconds\)'.\
             format(self.numberSearch, self.number)
         solution = self.apply_regex(regex)
@@ -578,7 +578,8 @@ class CBC(LogFile):
         if solution is None:
             return None, None, None, None
 
-        if solution[0] == '1e+50':
+        # if solution[0] == '1e+050':
+        if self.apply_regex('No feasible solution found'):
             objective = None
         else:
             objective = float(solution[0])
