@@ -85,20 +85,32 @@ class LogFile(object):
                     ct[i] = _c
             return [func[ct[i]](val) for i, val in enumerate(possible_tuple)]
 
-    def get_first_results(self, progress):
+    def get_first_relax(self, progress):
         """
-        scans the progress table for the initial relaxed solution and the initial integer solution
-        :return: tuple of length two
+        scans the progress table for the initial relaxed solution
+        :return: relaxation
         """
-        first_solution = first_relax = None
         df_filter = progress.CutsBestBound.apply(lambda x: re.search(r"^\s*{}$".format(self.number), x) is not None)
         if len(df_filter) > 0 and any(df_filter):
-            first_relax = float(progress.CutsBestBound[df_filter].iloc[0])
+            return float(progress.CutsBestBound[df_filter].iloc[0])
+        return None
 
+    def get_first_solution(self, progress):
+        """
+        scans the progress table for the initial integer solution
+        :param progress: table with progress
+        :return: dictionary with information on the moment of finding integer solution
+        """
+        vars_extract = ['Node', 'NodesLeft', 'BestInteger', 'CutsBestBound']
         df_filter = progress.BestInteger.fillna('').str.match(r"^\s*{}$".format(self.number))
+        # HACK: take out CBCs magic number (1e+50 for no integer solution found)
+        df_filter_1e50 = progress.BestInteger.fillna('').str.match(r"^\s*1e\+50$")
+        df_filter = np.all([df_filter, ~df_filter_1e50], axis=0)
         if len(df_filter) > 0 and any(df_filter):
-            first_solution = float(progress.BestInteger[df_filter].iloc[0])
-        return first_relax, first_solution
+            for col in vars_extract:
+                progress[col] = progress[col].str.replace(r'\D', '')
+            return pd.to_numeric(progress[vars_extract][df_filter].iloc[0]).to_dict()
+        return None
 
     @staticmethod
     def get_results_after_cuts(progress):
@@ -107,17 +119,18 @@ class LogFile(object):
         :return: tuple of length two
         """
         # we initialize with the last values in the progress table:
-        sol_value = progress.BestInteger.iloc[-1]
-        relax_value = progress.CutsBestBound.iloc[-1]
-
+        # sol_value = progress.BestInteger.iloc[-1]
+        # relax_value = progress.CutsBestBound.iloc[-1]
         df_filter = np.all((progress.Node.str.match(r"^\*?H?\s*0"),
                             progress.NodesLeft.str.match(r"^\+?H?\s*[12]")),
                            axis=0)
 
-        # in case we have some progress after the cuts, we replace those defaults
-        if np.any(df_filter):
-            sol_value = progress.BestInteger[df_filter].iloc[0]
-            relax_value = progress.CutsBestBound[df_filter].iloc[0]
+        # in case we have some progress after the cuts, we get those values
+        # if not, we return None to later fill with best_solution and best_bound
+        if not np.any(df_filter):
+            return None, None
+        sol_value = progress.BestInteger[df_filter].iloc[0]
+        relax_value = progress.CutsBestBound[df_filter].iloc[0]
 
         # finally, we return the found values
         if sol_value and re.search(r'^\s*-?\d', sol_value):
@@ -145,9 +158,12 @@ class LogFile(object):
         root_time = self.get_root_time()
         progress = self.get_progress()
         first_relax = first_solution = None
-        cut_info = self.get_cuts_dict(progress)
+        cut_info = self.get_cuts_dict(progress, bound, objective)
+
         if len(progress):
-            first_relax, first_solution = self.get_first_results(progress)
+            first_relax = self.get_first_relax(progress)
+            if solution_status in [c.LpSolutionIntegerFeasible, c.LpSolutionOptimal]:
+                first_solution = self.get_first_solution(progress)
 
         return {
             'version': version,
@@ -170,7 +186,7 @@ class LogFile(object):
             'nodes': nodes
         }
 
-    def get_cuts_dict(self, progress):
+    def get_cuts_dict(self, progress, best_bound, best_solution):
         """
         builds a dictionary with all information regarding to the applied cuts
         :return: a dictionary
@@ -180,6 +196,11 @@ class LogFile(object):
         cutsTime = self.get_cuts_time()
         cuts = self.get_cuts()
         after_cuts, sol_after_cuts = self.get_results_after_cuts(progress)
+        if after_cuts is None:
+            after_cuts = best_bound
+        if sol_after_cuts is None:
+            sol_after_cuts = best_solution
+
         return {'time': cutsTime,
                 'cuts': cuts,
                 'best_bound': after_cuts,
