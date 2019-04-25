@@ -295,6 +295,7 @@ class CPLEX(LogFile):
         super().__init__(path)
         self.name = 'CPLEX'
         self.solver_status_map = {
+            'MIP - Memory limit exceeded': c.LpStatusMemoryLimit,
             "MIP - Integer optimal": c.LpStatusSolved,
             "MIP - Integer infeasible.": c.LpStatusInfeasible,
             "MIP - Time limit exceeded": c.LpStatusTimeLimit,
