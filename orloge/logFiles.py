@@ -4,14 +4,14 @@ import pandas as pd
 import numpy as np
 import orloge.constants as c
 
-def get_info_solver(path, solver):
+def get_info_solver(path, solver, **options):
 
     if solver == 'CPLEX':
-        log = CPLEX(path)
+        log = CPLEX(path, **options)
     elif solver == 'GUROBI':
-        log = GUROBI(path)
+        log = GUROBI(path, **options)
     elif solver == 'CBC':
-        log = CBC(path)
+        log = CBC(path, **options)
     else:
         raise ValueError('solver {} is not recognized'.format(solver))
     return log.get_log_info()
@@ -23,7 +23,7 @@ class LogFile(object):
     We implement functions to get different information
     """
 
-    def __init__(self, path):
+    def __init__(self, path, **options):
         with open(path, 'r') as f:
             content = f.read()
 
@@ -36,6 +36,7 @@ class LogFile(object):
         self.version_regex = ''
         self.progress_filter = ''
         self.progress_names = []
+        self.options = options
 
     def apply_regex(self, regex, content_type=None, first=True, pos=None, num=None, **kwargs):
         """
@@ -156,7 +157,10 @@ class LogFile(object):
         time_out = self.get_time()
         nodes = self.get_nodes()
         root_time = self.get_root_time()
-        progress = self.get_progress()
+        if self.options.get('get_progress', True):
+            progress = self.get_progress()
+        else:
+            progress = pd.DataFrame()
         first_relax = first_solution = None
         cut_info = self.get_cuts_dict(progress, bound, objective)
 
@@ -291,8 +295,8 @@ class CPLEX(LogFile):
     # Reference:
     # https://www.ibm.com/support/knowledgecenter/SSSA5P_12.6.3/ilog.odms.cplex.help/CPLEX/UsrMan/topics/discr_optim/mip/para/52_node_log.html
 
-    def __init__(self, path):
-        super().__init__(path)
+    def __init__(self, path, **options):
+        super().__init__(path, **options)
         self.name = 'CPLEX'
         self.solver_status_map = {
             'MIP - Memory limit exceeded': c.LpStatusMemoryLimit,
@@ -336,7 +340,7 @@ class CPLEX(LogFile):
         """
         :return: tuple of length 3: bound, absolute gap, relative gap
         """
-        regex = r'Current MIP best bound =  {0} \(gap = {0}, {0}%\)'.format(self.numberSearch)
+        regex = r'Current MIP best bound =\s+{0} \(gap = {0}, {0}%\)'.format(self.numberSearch)
         result = self.apply_regex(regex, content_type='float')
         if result is None:
             return None, None, None
@@ -426,8 +430,8 @@ class CPLEX(LogFile):
 
 class GUROBI(LogFile):
 
-    def __init__(self, path):
-        super().__init__(path)
+    def __init__(self, path, **options):
+        super().__init__(path, **options)
         self.name = 'GUROBI'
         self.solver_status_map =  \
             {"Optimal solution found": c.LpStatusSolved,
@@ -446,7 +450,7 @@ class GUROBI(LogFile):
         self.progress_filter = r'(^[\*H]?\s+\d.*$)'
 
     def get_cuts(self):
-        regex = r'Cutting planes:([\n\s\w:]+)Explored'  # gurobi
+        regex = r'Cutting planes:([\n\s\-\w:]+)Explored'  # gurobi
         result = self.apply_regex(regex, flags=re.MULTILINE)
         cuts = [r for r in result.split('\n') if r != '']
         regex = r'\s*{}: {}'.format(self.wordSearch, self.numberSearch)
@@ -553,8 +557,8 @@ class GUROBI(LogFile):
 
 class CBC(LogFile):
 
-    def __init__(self, path):
-        super().__init__(path)
+    def __init__(self, path, **options):
+        super().__init__(path, **options)
         self.name = 'CBC'
         self.solver_status_map = {
             "Optimal solution found": c.LpStatusSolved,
