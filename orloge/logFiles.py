@@ -27,6 +27,7 @@ class LogFile(object):
         with open(path, 'r') as f:
             content = f.read()
 
+        self.path  = path
         self.content = content
         self.number = r'-?[\de\.\+]+'
         self.numberSearch = r'({})'.format(self.number)
@@ -139,6 +140,8 @@ class LogFile(object):
         solver_status, solution_status = self.get_status_codes(status, objective)
         if bound is None:
             bound = objective
+        if solution_status == c.LpSolutionOptimal:
+            gap_rel = 0
         presolve = self.get_lp_presolve()
         time_out = self.get_time()
         nodes = self.get_nodes()
@@ -324,6 +327,8 @@ class CPLEX(LogFile):
         """
         :return: tuple of length 3
         """
+        # TODO: this is not correctly calculated: we need to sum the change to the initial to get
+        # the original.
         regex = r'Reduced MIP has {0} rows, {0} columns, and {0} nonzeros'.format(self.numberSearch)
         return self.apply_regex(regex, content_type="int", num=0)
 
@@ -348,6 +353,8 @@ class CPLEX(LogFile):
         """
         :return: tuple  of length 3
         """
+        # TODO: this is not correctly calculated:
+        # we need to sum the two? preprocessings in my cases
         regex = r'Presolve time = {0} sec. \({0} ticks\)'.format(self.numberSearch)
         time = self.apply_regex(regex, pos=0, content_type="float")
 
@@ -424,7 +431,7 @@ class GUROBI(LogFile):
         self.progress_filter = r'(^[\*H]?\s+\d.*$)'
 
     def get_cuts(self):
-        regex = r'Cutting planes:([\n\s\w:]+)Explored'  # gurobi
+        regex = r'Cutting planes:([\n\s\w:-]+)Explored'  # gurobi
         result = self.apply_regex(regex, flags=re.MULTILINE)
         cuts = [r for r in result.split('\n') if r != '']
         regex = r'\s*{}: {}'.format(self.wordSearch, self.numberSearch)
