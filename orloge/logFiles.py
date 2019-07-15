@@ -24,8 +24,12 @@ class LogFile(object):
     """
 
     def __init__(self, path, **options):
-        with open(path, 'r') as f:
-            content = f.read()
+        
+        if options.get('content', False):
+            content = path
+        else:
+            with open(path, 'r') as f:
+                content = f.read()
 
         self.content = content
         self.number = r'-?[\de\.\+]+'

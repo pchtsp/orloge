@@ -38,3 +38,22 @@ kwargs = {
 }
 
 setup(**kwargs)
+
+"""
+reminder on how to deploy:
+(from https://packaging.python.org/tutorials/packaging-projects/)
+
+# installation:
+python -m pip install --upgrade pip
+python -m pip install --user --upgrade setuptools wheel
+python -m pip install --user --upgrade twine
+
+# bundelling
+python setup.py sdist bdist_wheel
+
+# test upload:
+python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+
+# real upload:
+python -m twine upload dist/*
+"""
