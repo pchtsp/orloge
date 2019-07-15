@@ -4,14 +4,14 @@ import pandas as pd
 import numpy as np
 import orloge.constants as c
 
-def get_info_solver(path, solver):
+def get_info_solver(path, solver, **options):
 
     if solver == 'CPLEX':
-        log = CPLEX(path)
+        log = CPLEX(path, **options)
     elif solver == 'GUROBI':
-        log = GUROBI(path)
+        log = GUROBI(path, **options)
     elif solver == 'CBC':
-        log = CBC(path)
+        log = CBC(path, **options)
     else:
         raise ValueError('solver {} is not recognized'.format(solver))
     return log.get_log_info()
@@ -23,7 +23,7 @@ class LogFile(object):
     We implement functions to get different information
     """
 
-    def __init__(self, path):
+    def __init__(self, path, **options):
         with open(path, 'r') as f:
             content = f.read()
 
@@ -37,6 +37,7 @@ class LogFile(object):
         self.version_regex = ''
         self.progress_filter = ''
         self.progress_names = []
+        self.options = options
 
     def apply_regex(self, regex, content_type=None, first=True, pos=None, num=None, **kwargs):
         """
@@ -86,20 +87,32 @@ class LogFile(object):
                     ct[i] = _c
             return [func[ct[i]](val) for i, val in enumerate(possible_tuple)]
 
-    def get_first_results(self, progress):
+    def get_first_relax(self, progress):
         """
-        scans the progress table for the initial relaxed solution and the initial integer solution
-        :return: tuple of length two
+        scans the progress table for the initial relaxed solution
+        :return: relaxation
         """
-        first_solution = first_relax = None
         df_filter = progress.CutsBestBound.apply(lambda x: re.search(r"^\s*{}$".format(self.number), x) is not None)
         if len(df_filter) > 0 and any(df_filter):
-            first_relax = float(progress.CutsBestBound[df_filter].iloc[0])
+            return float(progress.CutsBestBound[df_filter].iloc[0])
+        return None
 
+    def get_first_solution(self, progress):
+        """
+        scans the progress table for the initial integer solution
+        :param progress: table with progress
+        :return: dictionary with information on the moment of finding integer solution
+        """
+        vars_extract = ['Node', 'NodesLeft', 'BestInteger', 'CutsBestBound']
         df_filter = progress.BestInteger.fillna('').str.match(r"^\s*{}$".format(self.number))
+        # HACK: take out CBCs magic number (1e+50 for no integer solution found)
+        df_filter_1e50 = progress.BestInteger.fillna('').str.match(r"^\s*1e\+50$")
+        df_filter = np.all([df_filter, ~df_filter_1e50], axis=0)
         if len(df_filter) > 0 and any(df_filter):
-            first_solution = float(progress.BestInteger[df_filter].iloc[0])
-        return first_relax, first_solution
+            for col in vars_extract:
+                progress[col] = progress[col].str.replace(r'\D', '')
+            return pd.to_numeric(progress[vars_extract][df_filter].iloc[0]).to_dict()
+        return None
 
     @staticmethod
     def get_results_after_cuts(progress):
@@ -108,17 +121,18 @@ class LogFile(object):
         :return: tuple of length two
         """
         # we initialize with the last values in the progress table:
-        sol_value = progress.BestInteger.iloc[-1]
-        relax_value = progress.CutsBestBound.iloc[-1]
-
+        # sol_value = progress.BestInteger.iloc[-1]
+        # relax_value = progress.CutsBestBound.iloc[-1]
         df_filter = np.all((progress.Node.str.match(r"^\*?H?\s*0"),
                             progress.NodesLeft.str.match(r"^\+?H?\s*[12]")),
                            axis=0)
 
-        # in case we have some progress after the cuts, we replace those defaults
-        if np.any(df_filter):
-            sol_value = progress.BestInteger[df_filter].iloc[0]
-            relax_value = progress.CutsBestBound[df_filter].iloc[0]
+        # in case we have some progress after the cuts, we get those values
+        # if not, we return None to later fill with best_solution and best_bound
+        if not np.any(df_filter):
+            return None, None
+        sol_value = progress.BestInteger[df_filter].iloc[0]
+        relax_value = progress.CutsBestBound[df_filter].iloc[0]
 
         # finally, we return the found values
         if sol_value and re.search(r'^\s*-?\d', sol_value):
@@ -146,11 +160,17 @@ class LogFile(object):
         time_out = self.get_time()
         nodes = self.get_nodes()
         root_time = self.get_root_time()
-        progress = self.get_progress()
+        if self.options.get('get_progress', True):
+            progress = self.get_progress()
+        else:
+            progress = pd.DataFrame()
         first_relax = first_solution = None
-        cut_info = self.get_cuts_dict(progress)
+        cut_info = self.get_cuts_dict(progress, bound, objective)
+
         if len(progress):
-            first_relax, first_solution = self.get_first_results(progress)
+            first_relax = self.get_first_relax(progress)
+            if solution_status in [c.LpSolutionIntegerFeasible, c.LpSolutionOptimal]:
+                first_solution = self.get_first_solution(progress)
 
         return {
             'version': version,
@@ -173,7 +193,7 @@ class LogFile(object):
             'nodes': nodes
         }
 
-    def get_cuts_dict(self, progress):
+    def get_cuts_dict(self, progress, best_bound, best_solution):
         """
         builds a dictionary with all information regarding to the applied cuts
         :return: a dictionary
@@ -183,6 +203,11 @@ class LogFile(object):
         cutsTime = self.get_cuts_time()
         cuts = self.get_cuts()
         after_cuts, sol_after_cuts = self.get_results_after_cuts(progress)
+        if after_cuts is None:
+            after_cuts = best_bound
+        if sol_after_cuts is None:
+            sol_after_cuts = best_solution
+
         return {'time': cutsTime,
                 'cuts': cuts,
                 'best_bound': after_cuts,
@@ -273,10 +298,11 @@ class CPLEX(LogFile):
     # Reference:
     # https://www.ibm.com/support/knowledgecenter/SSSA5P_12.6.3/ilog.odms.cplex.help/CPLEX/UsrMan/topics/discr_optim/mip/para/52_node_log.html
 
-    def __init__(self, path):
-        super().__init__(path)
+    def __init__(self, path, **options):
+        super().__init__(path, **options)
         self.name = 'CPLEX'
         self.solver_status_map = {
+            'MIP - Memory limit exceeded': c.LpStatusMemoryLimit,
             "MIP - Integer optimal": c.LpStatusSolved,
             "MIP - Integer infeasible.": c.LpStatusInfeasible,
             "MIP - Time limit exceeded": c.LpStatusTimeLimit,
@@ -317,7 +343,7 @@ class CPLEX(LogFile):
         """
         :return: tuple of length 3: bound, absolute gap, relative gap
         """
-        regex = r'Current MIP best bound =  {0} \(gap = {0}, {0}%\)'.format(self.numberSearch)
+        regex = r'Current MIP best bound =\s+{0} \(gap = {0}, {0}%\)'.format(self.numberSearch)
         result = self.apply_regex(regex, content_type='float')
         if result is None:
             return None, None, None
@@ -411,8 +437,8 @@ class CPLEX(LogFile):
 
 class GUROBI(LogFile):
 
-    def __init__(self, path):
-        super().__init__(path)
+    def __init__(self, path, **options):
+        super().__init__(path, **options)
         self.name = 'GUROBI'
         self.solver_status_map =  \
             {"Optimal solution found": c.LpStatusSolved,
@@ -431,7 +457,7 @@ class GUROBI(LogFile):
         self.progress_filter = r'(^[\*H]?\s+\d.*$)'
 
     def get_cuts(self):
-        regex = r'Cutting planes:([\n\s\w:-]+)Explored'  # gurobi
+        regex = r'Cutting planes:([\n\s\-\w:]+)Explored'
         result = self.apply_regex(regex, flags=re.MULTILINE)
         cuts = [r for r in result.split('\n') if r != '']
         regex = r'\s*{}: {}'.format(self.wordSearch, self.numberSearch)
@@ -538,8 +564,8 @@ class GUROBI(LogFile):
 
 class CBC(LogFile):
 
-    def __init__(self, path):
-        super().__init__(path)
+    def __init__(self, path, **options):
+        super().__init__(path, **options)
         self.name = 'CBC'
         self.solver_status_map = {
             "Optimal solution found": c.LpStatusSolved,
@@ -574,10 +600,10 @@ class CBC(LogFile):
         if status is None:
             # no solution found, I still want the status
             for k in self.solver_status_map.keys():
-                search_string = re.escape(k)
-                if self.apply_regex(search_string):
-                    status = search_string
-                    return status, None, None, None
+                if self.apply_regex(re.escape(k)):
+                    return k, None, None, None
+        else:
+            status = status.strip()
         regex = r'best objective {0}( \(best possible {0}\))?, took {1} iterations and {1} nodes \({1} seconds\)'.\
             format(self.numberSearch, self.number)
         solution = self.apply_regex(regex)
@@ -585,7 +611,8 @@ class CBC(LogFile):
         if solution is None:
             return None, None, None, None
 
-        if solution[0] == '1e+50':
+        # if solution[0] == '1e+050':
+        if self.apply_regex('No feasible solution found'):
             objective = None
         else:
             objective = float(solution[0])
