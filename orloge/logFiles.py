@@ -337,7 +337,7 @@ class CPLEX(LogFile):
         """
         :return: tuple of length 2
         """
-        regex = r'Objective\s+=\s+{0}\n'.format(self.numberSearch)
+        regex = r'Objective\s+=\s+{0}\s*\n'.format(self.numberSearch)
         result = self.apply_regex(regex, flags=re.MULTILINE)
         if result is not None:
             result = float(result)
