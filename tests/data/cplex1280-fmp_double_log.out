@@ -1,0 +1,186 @@
+
+Log started (V12.8.0.0) Wed Oct 23 05:39:55 2019
+
+New value for time limit in seconds: 3600
+New value for mixed integer optimality gap tolerance: 0
+New value for absolute mixed integer optimality gap tolerance: 10
+New value for default parallel thread count: 1
+New value for type of flow cover cut generation: 1
+New value for type of mixed integer rounding cut generation: 1
+New value for factor for backtracking, lower values give more: 0.1
+New value for frequency to apply periodic heuristic algorithm: 100
+New value for node presolve strategy: 2
+New value for probing strategy: 3
+New value for candidate limit for generating Gomory fractional cuts: 10000
+New value for pass limit for generating Gomory fractional cuts: 10
+CPXPARAM_TimeLimit                               3600
+CPXPARAM_Threads                                 1
+CPXPARAM_MIP_Strategy_Backtrack                  0.10000000000000001
+CPXPARAM_MIP_Tolerances_AbsMIPGap                10
+CPXPARAM_MIP_Tolerances_MIPGap                   0
+CPXPARAM_MIP_Strategy_HeuristicFreq              100
+CPXPARAM_MIP_Strategy_PresolveNode               2
+CPXPARAM_MIP_Cuts_FlowCovers                     1
+CPXPARAM_MIP_Strategy_Probe                      3
+CPXPARAM_MIP_Limits_GomoryCand                   10000
+CPXPARAM_MIP_Limits_GomoryPass                   10
+CPXPARAM_MIP_Cuts_MIRCut                         1
+Tried aggregator 1 time.
+LP Presolve eliminated 6223 rows and 116 columns.
+Aggregator did 121 substitutions.
+Reduced LP has 55158 rows, 29806 columns, and 4370140 nonzeros.
+Presolve time = 1.00 sec. (503.25 ticks)
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =         -2595.662858
+Perturbation started.
+Iteration:   101   Dual objective     =         -2595.662858
+Iteration:   498   Dual objective     =         -2589.609265
+Iteration:  1378   Dual objective     =         -2583.821746
+Iteration:  2110   Dual objective     =         -2582.939238
+Iteration:  2712   Dual objective     =          4553.541314
+Iteration:  3352   Dual objective     =         61768.748013
+Iteration:  3746   Dual objective     =         61769.126960
+Iteration:  4146   Dual objective     =         61769.335482
+Iteration:  4594   Dual objective     =        105446.191024
+Iteration:  4984   Dual objective     =        105446.662350
+Removing perturbation.
+Iteration:  5287    Objective     =        105446.272645
+
+Dual simplex - Optimal:  Objective =  1.0544627262e+05
+Solution time =    4.43 sec.  Iterations = 5294 (0)
+Deterministic time = 2797.07 ticks  (631.25 ticks/sec)
+
+
+Solution written to file 'D:/franco.peschiera.fr/TEMP/b11cbc835163427cacb39a25d674d883-pulp.sol'.
+
+Log started (V12.8.0.0) Wed Oct 23 05:40:11 2019
+
+New value for time limit in seconds: 3600
+New value for mixed integer optimality gap tolerance: 0
+New value for absolute mixed integer optimality gap tolerance: 10
+New value for default parallel thread count: 1
+New value for type of flow cover cut generation: 1
+New value for type of mixed integer rounding cut generation: 1
+New value for factor for backtracking, lower values give more: 0.1
+New value for frequency to apply periodic heuristic algorithm: 100
+New value for node presolve strategy: 2
+New value for probing strategy: 3
+New value for candidate limit for generating Gomory fractional cuts: 10000
+New value for pass limit for generating Gomory fractional cuts: 10
+CPXPARAM_TimeLimit                               3600
+CPXPARAM_Threads                                 1
+CPXPARAM_MIP_Strategy_Backtrack                  0.10000000000000001
+CPXPARAM_MIP_Tolerances_AbsMIPGap                10
+CPXPARAM_MIP_Tolerances_MIPGap                   0
+CPXPARAM_MIP_Strategy_HeuristicFreq              100
+CPXPARAM_MIP_Strategy_PresolveNode               2
+CPXPARAM_MIP_Cuts_FlowCovers                     1
+CPXPARAM_MIP_Strategy_Probe                      3
+CPXPARAM_MIP_Limits_GomoryCand                   10000
+CPXPARAM_MIP_Limits_GomoryPass                   10
+CPXPARAM_MIP_Cuts_MIRCut                         1
+Tried aggregator 6 times.
+MIP Presolve eliminated 4498 rows and 2034 columns.
+MIP Presolve modified 1439 coefficients.
+Aggregator did 839 substitutions.
+Reduced MIP has 3884 rows, 8789 columns, and 97473 nonzeros.
+Reduced MIP has 5959 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.37 sec. (278.68 ticks)
+Probing fixed 6 vars, tightened 0 bounds.
+Probing time = 0.26 sec. (144.00 ticks)
+Cover probing fixed 6 vars, tightened 61 bounds.
+Tried aggregator 2 times.
+MIP Presolve eliminated 19 rows and 32 columns.
+MIP Presolve modified 128 coefficients.
+Aggregator did 5 substitutions.
+Reduced MIP has 3857 rows, 8752 columns, and 97138 nonzeros.
+Reduced MIP has 5956 binaries, 410 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.11 sec. (79.69 ticks)
+Probing fixed 1 vars, tightened 0 bounds.
+Probing time = 0.13 sec. (95.59 ticks)
+Probing added 5042 nonzeros.
+Clique table members: 1429.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time = 0.13 sec. (103.08 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+      0     0   460102.1243   145                 460102.1243     2682         
+      0     0   476324.2967   206                   Cuts: 206     2917         
+      0     0   479461.2258   276                    Cuts: 60     3052         
+      0     0   480982.2942   303                    Cuts: 75     3164         
+      0     0   480985.7203   261                    Cuts: 39     3223         
+      0     0   482157.8621   181                    Cuts: 32     3350         
+      0     0   482157.8666   193                    Cuts: 38     3385         
+      0     0   482157.8819   185                    Cuts: 13     3416         
+      0     0   482157.8899   203                    Cuts: 12     3446         
+      0     0   482157.8924   204                     Cuts: 6     3462         
+      0     0   482157.8942   204                     Cuts: 5     3472         
+*     0+    0                       482160.9305   482157.8942             0.00%
+
+GUB cover cuts applied:  6
+Clique cuts applied:  11
+Cover cuts applied:  1
+Implied bound cuts applied:  35
+Flow cuts applied:  6
+Mixed integer rounding cuts applied:  30
+Zero-half cuts applied:  18
+Lift and project cuts applied:  1
+Gomory fractional cuts applied:  27
+
+Root node processing (before b&c):
+  Real time             =    4.26 sec. (2900.36 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    4.26 sec. (2900.36 ticks)
+
+Solution pool: 1 solution saved.
+
+MIP - Integer optimal, tolerance (0/10):  Objective =  4.8216093054e+05
+Current MIP best bound =  4.8215789418e+05 (gap = 3.03636, 0.00%)
+Solution time =    4.26 sec.  Iterations = 3472  Nodes = 0 (1)
+Deterministic time = 2900.40 ticks  (681.00 ticks/sec)
+
+MILP problem relaxed to LP with fixed integer variables using
+incumbent solution.
+CPXPARAM_TimeLimit                               3600
+CPXPARAM_Threads                                 1
+CPXPARAM_MIP_Strategy_Backtrack                  0.10000000000000001
+CPXPARAM_MIP_Tolerances_AbsMIPGap                10
+CPXPARAM_MIP_Tolerances_MIPGap                   0
+CPXPARAM_MIP_Strategy_HeuristicFreq              100
+CPXPARAM_MIP_Strategy_PresolveNode               2
+CPXPARAM_MIP_Cuts_FlowCovers                     1
+CPXPARAM_MIP_Strategy_Probe                      3
+CPXPARAM_MIP_Limits_GomoryCand                   10000
+CPXPARAM_MIP_Limits_GomoryPass                   10
+CPXPARAM_MIP_Cuts_MIRCut                         1
+Tried aggregator 1 time.
+LP Presolve eliminated 6747 rows and 8506 columns.
+Aggregator did 1159 substitutions.
+Reduced LP has 1315 rows, 2003 columns, and 5566 nonzeros.
+Presolve time = 0.03 sec. (12.74 ticks)
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =         -2529.069458
+Perturbation started.
+Iteration:   101   Dual objective     =         -2529.069458
+Iteration:   249   Dual objective     =         38266.971569
+Iteration:   369   Dual objective     =        208303.300756
+Iteration:   472   Dual objective     =        439192.420665
+Iteration:   559   Dual objective     =        476596.233712
+Removing perturbation.
+
+Dual simplex - Optimal:  Objective =  4.8216093054e+05
+Solution time =    0.05 sec.  Iterations = 675 (0)
+Deterministic time = 29.51 ticks  (627.78 ticks/sec)
+
+
+Solution written to file 'D:/franco.peschiera.fr/TEMP/a93050364f494118beae3b2bab5f6e2c-pulp.sol'.

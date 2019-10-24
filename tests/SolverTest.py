@@ -231,6 +231,74 @@ class SolverTest(unittest.TestCase):
             'matrix_post': None,
             'cut_info': None
         },
+        "cplex1280-fmpFP4": {
+            'solver': "CPLEX",
+            'time': 2.17,
+            'nodes': 0,
+            'status_code': c.LpStatusSolved,
+            'sol_code': c.LpSolutionOptimal,
+            'matrix': {
+                'constraints': 6744,
+                'variables': 4583,
+                'nonzeros': 62949
+            },
+            'matrix_post': {
+                'constraints': 6164,
+                'variables': 4314,
+                'nonzeros': 51540
+            },
+            'cut_info': {
+                'cuts': {
+                    'Clique': 1
+                    , 'Implied bound': 3
+                    , 'Flow': 0
+                    , 'Mixed integer rounding': 2
+                    , 'Zero-half': 3
+                    , 'Lift and project': 2
+                    , 'Gomory fractional': 6
+                },
+                'time': None,
+                'best_bound': 1.8003715497e+04,
+                'best_solution': 1.8041793e+04
+            },
+            'best_bound': 1.8003715497e+04,
+            'best_solution': 1.8041793e+04
+        },
+        "cplex1280-fmp_double_log":{
+            'solver': "CPLEX",
+            'time': 4.26,
+            'nodes': 0,
+            'status_code': c.LpStatusSolved,
+            'sol_code': c.LpSolutionOptimal,
+            'matrix': {
+                'constraints': 3884,
+                'variables': 8789,
+                'nonzeros': 97473
+            },
+            'matrix_post': {
+                'constraints': 3857,
+                'variables': 8752,
+                'nonzeros': 97138
+            },
+            'cut_info': {
+                'cuts': {
+                    'GUB cover': 6
+                    , 'Clique': 11
+                    , 'Cover': 1
+                    , 'Implied bound': 35
+                    , 'Flow': 6
+                    , 'Mixed integer rounding': 30
+                    , 'Zero-half': 18
+                    , 'Lift and project': 1
+                    , 'Gomory fractional': 27
+                },
+                'time': None,
+                'best_bound': 4.821578942e+05,
+                'best_solution': 4.821609305e+05
+            },
+            'best_solution': 4.821609305e+05,
+            'best_bound': 4.821578942e+05
+        },
         "gurobi700-app1-2": {
                     'solver': "GUROBI",
                     'time': 46.67,

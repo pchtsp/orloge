@@ -1,0 +1,125 @@
+
+Log started (V12.8.0.0) Mon Apr  8 01:56:56 2019
+
+New value for time limit in seconds: 3600
+New value for mixed integer optimality gap tolerance: 0
+New value for absolute mixed integer optimality gap tolerance: 40
+New value for upper limit on size of tree in megabytes: 64413.2
+New value for type of flow cover cut generation: 1
+New value for type of mixed integer rounding cut generation: 1
+New value for factor for backtracking, lower values give more: 0.1
+New value for frequency to apply periodic heuristic algorithm: 100
+New value for node presolve strategy: 2
+New value for probing strategy: 3
+New value for candidate limit for generating Gomory fractional cuts: 10000
+New value for pass limit for generating Gomory fractional cuts: 10
+CPXPARAM_TimeLimit                               3600
+CPXPARAM_MIP_Strategy_Backtrack                  0.10000000000000001
+CPXPARAM_MIP_Tolerances_AbsMIPGap                40
+CPXPARAM_MIP_Tolerances_MIPGap                   0
+CPXPARAM_MIP_Limits_TreeMemory                   64413.1875
+CPXPARAM_MIP_Strategy_HeuristicFreq              100
+CPXPARAM_MIP_Strategy_PresolveNode               2
+CPXPARAM_MIP_Cuts_FlowCovers                     1
+CPXPARAM_MIP_Strategy_Probe                      3
+CPXPARAM_MIP_Limits_GomoryCand                   10000
+CPXPARAM_MIP_Limits_GomoryPass                   10
+CPXPARAM_MIP_Cuts_MIRCut                         1
+Tried aggregator 7 times.
+MIP Presolve eliminated 34490 rows and 402 columns.
+MIP Presolve modified 728 coefficients.
+Aggregator did 1618 substitutions.
+Reduced MIP has 6744 rows, 4583 columns, and 62949 nonzeros.
+Reduced MIP has 3196 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.33 sec. (319.37 ticks)
+Probing fixed 128 vars, tightened 0 bounds.
+Probing changed sense of 170 constraints.
+Probing time = 0.05 sec. (12.73 ticks)
+Cover probing fixed 0 vars, tightened 1 bounds.
+Tried aggregator 2 times.
+MIP Presolve eliminated 500 rows and 189 columns.
+MIP Presolve modified 511 coefficients.
+Aggregator did 80 substitutions.
+Reduced MIP has 6164 rows, 4314 columns, and 51540 nonzeros.
+Reduced MIP has 3007 binaries, 1 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.13 sec. (115.98 ticks)
+Probing time = 0.03 sec. (8.47 ticks)
+Probing added 2427 nonzeros.
+Clique table members: 3921.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: deterministic, using up to 12 threads.
+Root relaxation solution time = 0.66 sec. (409.49 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+      0     0    15192.1523   188                  15192.1523     4155         
+*     0+    0                        18041.7930    15192.1523            15.79%
+      0     0    18003.7155    88    18041.7930      Cuts: 37     5199    0.21%
+
+Clique cuts applied:  1
+Implied bound cuts applied:  3
+Flow cuts applied:  0
+Mixed integer rounding cuts applied:  2
+Zero-half cuts applied:  3
+Lift and project cuts applied:  2
+Gomory fractional cuts applied:  6
+
+Root node processing (before b&c):
+  Real time             =    2.17 sec. (1492.28 ticks)
+Parallel b&c, 12 threads:
+  Real time             =    0.00 sec. (0.00 ticks)
+  Sync time (average)   =    0.00 sec.
+  Wait time (average)   =    0.00 sec.
+                          ------------
+Total (root+branch&cut) =    2.17 sec. (1492.28 ticks)
+
+Solution pool: 1 solution saved.
+
+MIP - Integer optimal, tolerance (0/40):  Objective =  1.8041792998e+04
+Current MIP best bound =  1.8003715497e+04 (gap = 38.0775, 0.21%)
+Solution time =    2.17 sec.  Iterations = 5199  Nodes = 0 (1)
+Deterministic time = 1492.30 ticks  (686.16 ticks/sec)
+
+MILP problem relaxed to LP with fixed integer variables using
+incumbent solution.
+CPXPARAM_TimeLimit                               3600
+CPXPARAM_MIP_Strategy_Backtrack                  0.10000000000000001
+CPXPARAM_MIP_Tolerances_AbsMIPGap                40
+CPXPARAM_MIP_Tolerances_MIPGap                   0
+CPXPARAM_MIP_Limits_TreeMemory                   64413.1875
+CPXPARAM_MIP_Strategy_HeuristicFreq              100
+CPXPARAM_MIP_Strategy_PresolveNode               2
+CPXPARAM_MIP_Cuts_FlowCovers                     1
+CPXPARAM_MIP_Strategy_Probe                      3
+CPXPARAM_MIP_Limits_GomoryCand                   10000
+CPXPARAM_MIP_Limits_GomoryPass                   10
+CPXPARAM_MIP_Cuts_MIRCut                         1
+Parallel mode: deterministic, using up to 12 threads for concurrent optimization.
+Tried aggregator 1 time.
+LP Presolve eliminated 41561 rows and 5366 columns.
+Aggregator did 640 substitutions.
+Reduced LP has 651 rows, 597 columns, and 2307 nonzeros.
+Presolve time = 0.01 sec. (13.42 ticks)
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     =         18041.792998
+Perturbation started.
+Iteration:    51   Dual objective     =         18041.792998
+Iteration:   165   Dual objective     =         18041.830372
+Iteration:   244   Dual objective     =         18041.843238
+Iteration:   316   Dual objective     =         18041.856586
+Iteration:   378   Dual objective     =         18041.904195
+Removing perturbation.
+
+Dual simplex solved model.
+
+
+Dual simplex - Optimal:  Objective =  1.8041792998e+04
+Solution time =    0.04 sec.  Iterations = 410 (0)
+Deterministic time = 32.91 ticks  (819.65 ticks/sec)
+
+
+Solution written to file 'MFMP_v0002-pulp.sol'.

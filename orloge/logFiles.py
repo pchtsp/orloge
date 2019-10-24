@@ -49,6 +49,7 @@ class LogFile(object):
         content_type are optional type casting for the results (int, float, str)
         if first is false, we take the raw output from the re.findall. Useful for progress table.
         num means, if there are multiple matches in re.findall, num tells which position to take out.
+        if num=-1, we take the last one
         pos means the group we want to take out from all the groups of the relevant match.
         kwargs are additional parameters to the re.findall function
         :return: a list, a tuple or a single value with type "content_type"
@@ -124,25 +125,24 @@ class LogFile(object):
         gets relaxed and integer solutions after the cuts phase has ended.
         :return: tuple of length two
         """
-        # we initialize with the last values in the progress table:
-        # sol_value = progress.BestInteger.iloc[-1]
-        # relax_value = progress.CutsBestBound.iloc[-1]
         df_filter = np.all((progress.Node.str.match(r"^\*?H?\s*0"),
-                            progress.NodesLeft.str.match(r"^\+?H?\s*[12]")),
+                            progress.NodesLeft.str.match(r"^\+?H?\s*[012]")),
                            axis=0)
 
         # in case we have some progress after the cuts, we get those values
         # if not, we return None to later fill with best_solution and best_bound
         if not np.any(df_filter):
             return None, None
-        sol_value = progress.BestInteger[df_filter].iloc[0]
-        relax_value = progress.CutsBestBound[df_filter].iloc[0]
+        sol_value = progress.BestInteger[df_filter].iloc[-1]
+        relax_value = progress.CutsBestBound[df_filter].iloc[-1]
 
         # finally, we return the found values
         if sol_value and re.search(r'^\s*-?\d', sol_value):
             sol_value = float(sol_value)
         if relax_value and re.search(r'^\s*-?\d', relax_value):
             relax_value = float(relax_value)
+        else:
+            relax_value = None
 
         return relax_value, sol_value
 
@@ -209,8 +209,6 @@ class LogFile(object):
         after_cuts, sol_after_cuts = self.get_results_after_cuts(progress)
         if after_cuts is None:
             after_cuts = best_bound
-        if sol_after_cuts is None:
-            sol_after_cuts = best_solution
 
         return {'time': cutsTime,
                 'cuts': cuts,
@@ -316,10 +314,32 @@ class CPLEX(LogFile):
             "No file read": c.LpStatusNotSolved
         }
 
-        self.version_regex = r"Welcome to IBM\(R\) ILOG\(R\) CPLEX\(R\) Interactive Optimizer (\S+)"
+        self.version_regex = [r"Welcome to IBM\(R\) ILOG\(R\) CPLEX\(R\) Interactive Optimizer (\S+)",
+                              r"Log started \(\S+\)"]
+        self.header_log_start = ['Welcome to IBM', "Log started"]
         self.progress_names = ['Node', 'NodesLeft', 'Objective', 'IInf',
                                'BestInteger', 'CutsBestBound', 'ItpNode', 'Gap']
         self.progress_filter = r'(^[\*H]?\s+\d.*$)'
+        # in case of multiple logs in the same file,
+        # we choose to get the last one.
+        self.content = self.clean_before_last_log()
+
+    def clean_before_last_log(self):
+        options = self.header_log_start
+        for opt in options:
+            # this finds the last occurence of the string
+            pos = self.content.rfind(opt)
+            if pos != -1:
+                return self.content[pos:]
+        return self.content
+
+    def get_version(self):
+        result = None
+        for reg in self.version_regex:
+            result = self.apply_regex(reg)
+            if result:
+                break
+        return result
 
     def get_stats(self):
         status = self.get_status()
