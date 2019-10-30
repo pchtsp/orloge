@@ -219,6 +219,12 @@ class SolverTest(unittest.TestCase):
                 'best_bound': 75033.0540,
                 'best_solution': None
             },
+            'first_solution': {
+                'Node': 4101,
+                'NodesLeft': 2714,
+                'BestInteger': 119124.1217,
+                'CutsBestBound': 75034.9046
+            },
             'best_solution': 7.8045498368e+04,
             'best_bound': 7.5036256250e+04},
         "cplex1280-fmpFP3": {
@@ -295,6 +301,12 @@ class SolverTest(unittest.TestCase):
                 'time': None,
                 'best_bound': 4.821578942e+05,
                 'best_solution': 4.821609305e+05
+            },
+            'first_solution': {
+                'Node': 0,
+                'NodesLeft': 0,
+                'BestInteger': 482160.9305,
+                'CutsBestBound': 482157.8942
             },
             'best_solution': 4.821609305e+05,
             'best_bound': 4.821578942e+05

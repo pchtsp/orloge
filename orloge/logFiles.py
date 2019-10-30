@@ -4,8 +4,8 @@ import pandas as pd
 import numpy as np
 import orloge.constants as c
 
-def get_info_solver(path, solver, **options):
 
+def get_info_solver(path, solver, **options):
     if solver == 'CPLEX':
         log = CPLEX(path, **options)
     elif solver == 'GUROBI':
@@ -66,7 +66,7 @@ class LogFile(object):
         possible_tuple = solution[num]
         if type(possible_tuple) is str:
             # we force a tuple to deal with one string lists
-            possible_tuple = (possible_tuple, )
+            possible_tuple = (possible_tuple,)
             pos = 0
         func = {
             'float': float,
@@ -115,7 +115,10 @@ class LogFile(object):
         df_filter = np.all([df_filter, ~df_filter_1e50], axis=0)
         if len(df_filter) > 0 and any(df_filter):
             for col in vars_extract:
-                progress[col] = progress[col].str.replace(r'\D', '')
+                floatSearch = r'[+-]?[\d]+(\.[\d]+)?([Ee][+-]?[\d]+)?'
+                regex = '^({}).*$'.format(floatSearch)
+                progress[col] = progress[col].str.extract(regex)[[0]]
+                # progress[col] = progress[col].str.replace('(?!{})'.format(self.number), '')
             return pd.to_numeric(progress[vars_extract][df_filter].iloc[0]).to_dict()
         return None
 
@@ -464,7 +467,7 @@ class GUROBI(LogFile):
     def __init__(self, path, **options):
         super().__init__(path, **options)
         self.name = 'GUROBI'
-        self.solver_status_map =  \
+        self.solver_status_map = \
             {"Optimal solution found": c.LpStatusSolved,
              'Solved with barrier': c.LpStatusSolved,
              "Model is infeasible": c.LpStatusInfeasible,
@@ -497,8 +500,8 @@ class GUROBI(LogFile):
         return self.apply_regex(regex, content_type="int")
 
     def get_stats(self):
-        regex = r'{1}( \(.*\))?\nBest objective ({0}|-), best bound ({0}|-), gap ({0}|-)'.\
-            format(self.numberSearch,self.wordSearch)
+        regex = r'{1}( \(.*\))?\nBest objective ({0}|-), best bound ({0}|-), gap ({0}|-)'. \
+            format(self.numberSearch, self.wordSearch)
         # content_type = ['', '', 'float', 'float', 'float']
         solution = self.apply_regex(regex)
         if solution is None:
@@ -628,7 +631,7 @@ class CBC(LogFile):
                     return k, None, None, None
         else:
             status = status.strip()
-        regex = r'best objective {0}( \(best possible {0}\))?, took {1} iterations and {1} nodes \({1} seconds\)'.\
+        regex = r'best objective {0}( \(best possible {0}\))?, took {1} iterations and {1} nodes \({1} seconds\)'. \
             format(self.numberSearch, self.number)
         solution = self.apply_regex(regex)
 
@@ -686,5 +689,4 @@ class CBC(LogFile):
 
 
 if __name__ == "__main__":
-
     pass
