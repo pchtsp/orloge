@@ -207,8 +207,11 @@ class LogFile(object):
         """
         if not len(progress):
             return None
-        cutsTime = self.get_cuts_time()
         cuts = self.get_cuts()
+        if not cuts:
+            # if no cuts were found, no cuts statistics are produced
+            return {}
+        cutsTime = self.get_cuts_time()
         after_cuts, sol_after_cuts = self.get_results_after_cuts(progress)
         if after_cuts is None:
             after_cuts = best_bound
@@ -486,6 +489,9 @@ class GUROBI(LogFile):
     def get_cuts(self):
         regex = r'Cutting planes:([\n\s\-\w:]+)Explored'
         result = self.apply_regex(regex, flags=re.MULTILINE)
+        if not result:
+            # if no cuts found, return empty dictionary
+            return {}
         cuts = [r for r in result.split('\n') if r != '']
         regex = r'\s*{}: {}'.format(self.wordSearch, self.numberSearch)
         searches = [re.search(regex, v) for v in cuts]

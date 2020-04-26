@@ -420,6 +420,24 @@ class SolverTest(unittest.TestCase):
                     },
                     'best_solution': 4.430000000000e+02,
                     'best_bound': 4.430000000000e+02},
+                "gurobi901-noCuts": {
+                    'solver': "GUROBI",
+                    'time': 68.88,
+                    'nodes': 1,
+                    'status_code': c.LpStatusSolved,
+                    'matrix': {
+                        'constraints': 537927,
+                        'variables': 381096,
+                        'nonzeros': 1946442
+                    },
+                    'matrix_post': {
+                        'constraints': 74769,
+                        'variables': 10145,
+                        'nonzeros': 314632
+                    },
+                    'cut_info': {},
+                    'best_solution': 36,
+                    'best_bound': 36},
                 # "xpress300103-app1-2": {
                 #     'solver': "XPRESS",
                 #     'time': 29,
