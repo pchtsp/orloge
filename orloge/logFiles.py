@@ -159,7 +159,7 @@ class LogFile(object):
         matrix_post = self.get_matrix_dict(post=True)
         status, objective, bound, gap_rel = self.get_stats()
         solver_status, solution_status = self.get_status_codes(status, objective)
-        if bound is None:
+        if bound is None and solution_status == c.LpSolutionOptimal:
             bound = objective
         if solution_status == c.LpSolutionOptimal:
             gap_rel = 0
@@ -321,11 +321,11 @@ class CPLEX(LogFile):
         }
 
         self.version_regex = [r"Welcome to IBM\(R\) ILOG\(R\) CPLEX\(R\) Interactive Optimizer (\S+)",
-                              r"Log started \(\S+\)"]
+                              r"Log started \((\S+)\)"]
         self.header_log_start = ['Welcome to IBM', "Log started"]
         self.progress_names = ['Node', 'NodesLeft', 'Objective', 'IInf',
                                'BestInteger', 'CutsBestBound', 'ItpNode', 'Gap']
-        self.progress_filter = r'(^[\*H]?\s+\d.*$)'
+        self.progress_filter = r'(^[\*H]?\s*\d.*$)'
         # in case of multiple logs in the same file,
         # we choose to get the last one.
         self.content = self.clean_before_last_log()
@@ -344,7 +344,7 @@ class CPLEX(LogFile):
         for reg in self.version_regex:
             result = self.apply_regex(reg)
             if result:
-                break
+                return result
         return result
 
     def get_stats(self):
@@ -384,7 +384,7 @@ class CPLEX(LogFile):
         :return: tuple of length 3
         """
         # TODO: this is not correctly calculated: we need to sum the change to the initial to get
-        # the original.
+        #  the original.
         regex = r'Reduced MIP has {0} rows, {0} columns, and {0} nonzeros'.format(self.numberSearch)
         return self.apply_regex(regex, content_type="int", num=0)
 
@@ -410,7 +410,7 @@ class CPLEX(LogFile):
         :return: tuple  of length 3
         """
         # TODO: this is not correctly calculated:
-        # we need to sum the two? preprocessings in my cases
+        #  we need to sum the two? preprocessings in my cases
         regex = r'Presolve time = {0} sec. \({0} ticks\)'.format(self.numberSearch)
         time = self.apply_regex(regex, pos=0, content_type="float")
 
@@ -422,6 +422,10 @@ class CPLEX(LogFile):
 
     def get_time(self):
         regex = r'Solution time =\s+{0} sec\.\s+Iterations = {0}\s+Nodes = {0}'.format(self.numberSearch)
+        result = self.apply_regex(regex, content_type="float", pos=0)
+        if result is not None:
+            return result
+        regex = "Total \(root\+branch&cut\) = {0} sec\. \({0} ticks\)".format(self.numberSearch)
         return self.apply_regex(regex, content_type="float", pos=0)
 
     def get_nodes(self):
@@ -458,11 +462,48 @@ class CPLEX(LogFile):
             else:
                 args['iinf'] = '()'
 
-        find = re.search(r'\s+{n}\s+{n_left}\s+{obj}\s+{iinf}?\s+{b_int}?\s+{b_bound}\s+{ItCnt}\s+{gap}?'.
+        find = re.search(r'\s*{n}\s*{n_left}\s+{obj}\s+{iinf}?\s+{b_int}?\s+{b_bound}\s+{ItCnt}\s*{gap}?'.
                          format(**args), line)
         if not find:
             return None
         return find.groups()
+
+    def get_progress(self):
+        progress = super().get_progress()
+        if len(progress):
+            times = self.get_time_column()
+            progress['Time'] = times
+        return progress
+
+    def get_time_column(self):
+        """
+        :return: Time column with same length as progress dataframe.
+        """
+        regex1 = self.progress_filter
+        args = [self.numberSearch for l in range(4)]
+        regex = r'Elapsed time = {} sec. \({} ticks, tree = {} MB, solutions = {}\)'. \
+            format(*args)
+        end_time = self.get_time()
+        table_start_rx = r'\s*Node'
+        table_start = False
+        i = 0
+        time = [(i, 0)]
+        for l in self.content.split('\n'):
+            if re.search(table_start_rx, l):
+                table_start = True
+            if not table_start:
+                continue
+            if re.search(regex1, l):
+                i += 1
+                continue
+            result = re.search(regex, l)
+            if not result:
+                continue
+            data = result.groups()
+            time.append((i, float(data[0])))
+        time.append((i, end_time))
+        x, y = zip(*time)
+        return np.interp(xp=x, fp=y, x=range(1, x[-1]+1))
 
 
 class GUROBI(LogFile):

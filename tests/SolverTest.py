@@ -270,7 +270,7 @@ class SolverTest(unittest.TestCase):
             'best_bound': 1.8003715497e+04,
             'best_solution': 1.8041793e+04
         },
-        "cplex1280-fmp_double_log":{
+        "cplex1280-fmp_double_log": {
             'solver': "CPLEX",
             'time': 4.26,
             'nodes': 0,
@@ -310,6 +310,48 @@ class SolverTest(unittest.TestCase):
             },
             'best_solution': 4.821609305e+05,
             'best_bound': 4.821578942e+05
+        },
+        "cplex1280-fmp-memoryerror": {
+            'solver': "CPLEX",
+            'version': "V12.8.0.0",
+            'time': 2011.81,
+            'nodes': None,
+            'status_code': c.LpStatusMemoryLimit,
+            'sol_code': c.LpSolutionIntegerFeasible,
+            'matrix': {
+                'constraints': 9203,
+                'variables': 11818,
+                'nonzeros': 492539
+            },
+            'matrix_post': {
+                'constraints': 9194,
+                'variables': 11803,
+                'nonzeros': 492011
+            },
+            'cut_info': {
+                'cuts': {
+                    'GUB cover': 26
+                    , 'Clique': 13
+                    , 'Cover': 473
+                    , 'Implied bound': 41
+                    , 'Flow': 14
+                    , 'Mixed integer rounding': 60
+                    , 'Zero-half': 39
+                    , 'Lift and project': 68
+                    , 'Gomory fractional': 41
+                },
+                'time': 11.03,
+                'best_bound': 704149.2079,
+                'best_solution': 3798961.8736
+            },
+            'first_solution': {
+                'Node': 0,
+                'NodesLeft': 0,
+                'BestInteger': 4170639.0789,
+                'CutsBestBound': 704149.1604
+            },
+            'best_solution': 740618.6805,
+            'best_bound': None
         },
         "gurobi700-app1-2": {
                     'solver': "GUROBI",
