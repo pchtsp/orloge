@@ -16,7 +16,7 @@ for r in requirementslist:
 
 kwargs = {
     "name": "orloge",
-    "version": 0.13,
+    "version": 0.14,
     "packages": packages,
     "description": "OR log extractor",
     "long_description": long_description,
