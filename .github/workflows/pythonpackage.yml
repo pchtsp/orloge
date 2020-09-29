@@ -24,4 +24,4 @@ jobs:
         pip install .
     - name: Test
       run: |
-        python -m unittest test
+        python -m unittest tests.SolverTest
