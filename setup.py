@@ -16,7 +16,7 @@ for r in requirementslist:
 
 kwargs = {
     "name": "orloge",
-    "version": 0.14,
+    "version": 0.15,
     "packages": packages,
     "description": "OR log extractor",
     "long_description": long_description,
@@ -44,16 +44,16 @@ reminder on how to deploy:
 (from https://packaging.python.org/tutorials/packaging-projects/)
 
 # installation:
-python -m pip install --upgrade pip
-python -m pip install --user --upgrade setuptools wheel
-python -m pip install --user --upgrade twine
+python3.8 -m pip install --upgrade pip
+python3.8 -m pip install --user --upgrade setuptools wheel --user
+python3.8 -m pip install --user --upgrade twine --user
 
 # bundelling
-python setup.py sdist bdist_wheel
+python3.8 setup.py sdist bdist_wheel
 
 # test upload:
-python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+python3.8 -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
 # real upload:
-python -m twine upload dist/*
+python3.8 -m twine upload dist/*
 """

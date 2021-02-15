@@ -1,0 +1,108 @@
+Log started (V12.8.0.0) Wed Dec  4 15:33:33 2019
+New value for time limit in seconds: 3600
+New value for mixed integer optimality gap tolerance: 0
+New value for absolute mixed integer optimality gap tolerance: 10
+New value for default parallel thread count: 1
+New value for type of flow cover cut generation: 1
+New value for type of mixed integer rounding cut generation: 1
+New value for factor for backtracking, lower values give more: 0.1
+New value for frequency to apply periodic heuristic algorithm: 100
+New value for node presolve strategy: 2
+New value for probing strategy: 3
+New value for candidate limit for generating Gomory fractional cuts: 10000
+New value for pass limit for generating Gomory fractional cuts: 10
+CPXPARAM_TimeLimit                               3600
+CPXPARAM_Threads                                 1
+CPXPARAM_MIP_Strategy_Backtrack                  0.10000000000000001
+CPXPARAM_MIP_Tolerances_AbsMIPGap                10
+CPXPARAM_MIP_Tolerances_MIPGap                   0
+CPXPARAM_MIP_Strategy_HeuristicFreq              100
+CPXPARAM_MIP_Strategy_PresolveNode               2
+CPXPARAM_MIP_Cuts_FlowCovers                     1
+CPXPARAM_MIP_Strategy_Probe                      3
+CPXPARAM_MIP_Limits_GomoryCand                   10000
+CPXPARAM_MIP_Limits_GomoryPass                   10
+CPXPARAM_MIP_Cuts_MIRCut                         1
+Aggregator has done 256 substitutions...
+Tried aggregator 3 times.
+MIP Presolve eliminated 12216 rows and 969 columns.
+MIP Presolve modified 593239 coefficients.
+Aggregator did 256 substitutions.
+Reduced MIP has 48938 rows, 28780 columns, and 3578287 nonzeros.
+Reduced MIP has 23922 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 29.00 sec. (11757.37 ticks)
+Elapsed time = 19.38 sec. (10000.30 ticks) for 56% of probing (73 vars fixed)
+Probing fixed 73 vars, tightened 0 bounds.
+Probing time = 23.01 sec. (11653.43 ticks)
+Cover probing fixed 3 vars, tightened 31 bounds.
+Tried aggregator 3 times.
+MIP Presolve eliminated 440 rows and 81 columns.
+MIP Presolve modified 82939 coefficients.
+Aggregator did 2 substitutions.
+Reduced MIP has 48495 rows, 28697 columns, and 3555015 nonzeros.
+Reduced MIP has 23849 binaries, 162 generals, 0 SOSs, and 0 indicators.
+Presolve time = 20.09 sec. (5471.25 ticks)
+Probing time = 3.31 sec. (1285.29 ticks)
+Cover probing fixed 2 vars, tightened 18 bounds.
+Probing added 14096 nonzeros.
+Clique table members: 2002.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: none, using 1 thread.
+Root relaxation solution time = 59.06 sec. (5508.82 ticks)
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+      0     0    -2445.5691   299                  -2445.5691     8117         
+      0     0    -2425.0602   293                   Cuts: 372     9946         
+      0     0    -2392.8643   300                   Cuts: 207    11194         
+      0     0    -2388.4548   310                   Cuts: 225    12247         
+      0     0    -1244.1796   292                   Cuts: 123    13042         
+      0     0     1018.6681   355                   Cuts: 147    13392         
+      0     0     7904.4113   318                   Cuts: 141    14002         
+      0     0    12654.2784   342                   Cuts: 118    14536         
+      0     0        cutoff                                      14658         
+Elapsed time = 327.59 sec. (69707.48 ticks, tree = 0.01 MB, solutions = 0)
+GUB cover cuts applied:  19
+Clique cuts applied:  35
+Cover cuts applied:  1
+Implied bound cuts applied:  128
+Flow cuts applied:  23
+Mixed integer rounding cuts applied:  87
+Zero-half cuts applied:  28
+Gomory fractional cuts applied:  54
+Root node processing (before b&c):
+  Real time             =  327.76 sec. (69718.12 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =  327.76 sec. (69718.12 ticks)
+MIP - Integer infeasible.
+Current MIP best bound is infinite.
+Solution time =  327.76 sec.  Iterations = 14658  Nodes = 0
+Deterministic time = 69718.21 ticks  (212.71 ticks/sec)
+CPLEX Error  1217: No solution exists.
+No changes made.
+CPXPARAM_TimeLimit                               3600
+CPXPARAM_Threads                                 1
+CPXPARAM_MIP_Strategy_Backtrack                  0.10000000000000001
+CPXPARAM_MIP_Tolerances_AbsMIPGap                10
+CPXPARAM_MIP_Tolerances_MIPGap                   0
+CPXPARAM_MIP_Strategy_HeuristicFreq              100
+CPXPARAM_MIP_Strategy_PresolveNode               2
+CPXPARAM_MIP_Cuts_FlowCovers                     1
+CPXPARAM_MIP_Strategy_Probe                      3
+CPXPARAM_MIP_Limits_GomoryCand                   10000
+CPXPARAM_MIP_Limits_GomoryPass                   10
+CPXPARAM_MIP_Cuts_MIRCut                         1
+Root node processing (before b&c):
+  Real time             =    0.00 sec. (0.00 ticks)
+Sequential b&c:
+  Real time             =    0.00 sec. (0.00 ticks)
+                          ------------
+Total (root+branch&cut) =    0.00 sec. (0.00 ticks)
+MIP - Integer infeasible.
+Current MIP best bound is infinite.
+Solution time =    0.00 sec.  Iterations = 14658  Nodes = 0
+Deterministic time = 0.00 ticks  (0.95 ticks/sec)
+CPLEX Error  1217: No solution exists.
+No file written.

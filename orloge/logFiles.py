@@ -97,9 +97,11 @@ class LogFile(object):
         scans the progress table for the initial relaxed solution
         :return: relaxation
         """
-        df_filter = progress.CutsBestBound.apply(lambda x: re.search(r"^\s*{}$".format(self.number), x) is not None)
+        bestBounds = progress.CutsBestBound[~progress.CutsBestBound.isna()]
+        
+        df_filter = bestBounds.apply(lambda x: re.search(r"^\s*{}$".format(self.number), x) is not None)
         if len(df_filter) > 0 and any(df_filter):
-            return float(progress.CutsBestBound[df_filter].iloc[0])
+            return float(bestBounds[df_filter].iloc[0])
         return None
 
     def get_first_solution(self, progress):
@@ -450,8 +452,9 @@ class CPLEX(LogFile):
             args['ItCnt'] = '()'
             args['iinf'] = '()'
 
-        if re.search(r'Cuts: \d+', line):
-            args['b_bound'] = r'(Cuts: \d+)'
+        # TODO: maybe include explicit optioms: Impl Bds, Cuts, ZeroHalf, Flowcuts,
+        if re.search(r'[a-zA-Z\s]+: \d+', line):
+            args['b_bound'] = r'([a-zA-Z\s]+: \d+)'
 
         get = re.search(r'\*?\s*\d+\+?\s*\d+\s*(infeasible|cutoff|integral)', line)
         if get is not None:
@@ -461,9 +464,12 @@ class CPLEX(LogFile):
                 args['iinf'] = '(0)'
             else:
                 args['iinf'] = '()'
+            if state in ['cutoff', 'infeasible']:
+                args['b_bound'] += '?'
 
-        find = re.search(r'\s*{n}\s*{n_left}\s+{obj}\s+{iinf}?\s+{b_int}?\s+{b_bound}\s+{ItCnt}\s*{gap}?'.
-                         format(**args), line)
+        find = re.search(
+            r'\s*{n}\s*{n_left}\s+{obj}\s+{iinf}?\s+{b_int}?\s+{b_bound}\s+{ItCnt}\s*{gap}?'.format(**args),
+            line)
         if not find:
             return None
         return find.groups()
@@ -471,8 +477,11 @@ class CPLEX(LogFile):
     def get_progress(self):
         progress = super().get_progress()
         if len(progress):
-            times = self.get_time_column()
-            progress['Time'] = times
+            try:
+                times = self.get_time_column()
+                progress['Time'] = times
+            except TypeError:
+                progress['Time'] = None
         return progress
 
     def get_time_column(self):
@@ -503,7 +512,9 @@ class CPLEX(LogFile):
             time.append((i, float(data[0])))
         time.append((i, end_time))
         x, y = zip(*time)
-        return np.interp(xp=x, fp=y, x=range(1, x[-1]+1))
+        numbers = np.interp(xp=x, fp=y, x=range(1, x[-1]+1))
+        # we coerce to string to match the other solvers output:
+        return numbers.astype("|S6", errors=np.nan)
 
 
 class GUROBI(LogFile):

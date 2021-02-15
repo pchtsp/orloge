@@ -353,6 +353,41 @@ class SolverTest(unittest.TestCase):
             'best_solution': 740618.6805,
             'best_bound': None
         },
+        "cplex1280-fmp-cutoff": {
+            'solver': "CPLEX",
+            'version': "V12.8.0.0",
+            'time': 327.76,
+            'nodes': 0,
+            'status_code': c.LpStatusInfeasible,
+            'sol_code': c.LpSolutionInfeasible,
+            'matrix': {
+                'constraints': 48938,
+                'variables': 28780,
+                'nonzeros': 3578287
+            },
+            'matrix_post': {
+                'constraints': 48495,
+                'variables': 28697,
+                'nonzeros': 3555015
+            },
+            'cut_info': {
+                'cuts': {
+                    'GUB cover': 19
+                    , 'Clique': 35
+                    , 'Cover': 1
+                    , 'Implied bound': 128
+                    , 'Flow': 23
+                    , 'Mixed integer rounding': 87
+                    , 'Zero-half': 28
+                    , 'Gomory fractional': 54
+                },
+                'time': 327.59,
+                'best_solution': None,
+                'best_bound': None
+            },
+            'best_solution': None,
+            'best_bound': None
+        },
         "gurobi700-app1-2": {
                     'solver': "GUROBI",
                     'time': 46.67,
@@ -800,6 +835,9 @@ class SolverTest(unittest.TestCase):
             file = self.getFileName(filename)
             solver = contents['solver']
             data = ol.logFiles.get_info_solver(file, solver)
+            # a = data['progress'].to_dict(orient='split')
+            # a.pop('index', None)
+            # a['data'][0]
             for key, value in contents.items():
                 if key not in data:
                     print("not checking: {} in {}".format(key, filename))
