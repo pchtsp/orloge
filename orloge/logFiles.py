@@ -512,9 +512,9 @@ class CPLEX(LogFile):
             time.append((i, float(data[0])))
         time.append((i, end_time))
         x, y = zip(*time)
-        numbers = np.interp(xp=x, fp=y, x=range(1, x[-1]+1))
+        numbers = np.interp(xp=x, fp=y, x=range(1, x[-1]+1)).round(2)
         # we coerce to string to match the other solvers output:
-        return numbers.astype("|S6", errors=np.nan)
+        return numbers.astype("str")
 
 
 class GUROBI(LogFile):
