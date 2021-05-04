@@ -388,6 +388,21 @@ class SolverTest(unittest.TestCase):
             'best_solution': None,
             'best_bound': None
         },
+        "trivial.True.True.cplex.300": {
+            'solver': "CPLEX",
+            'version': "20.1.0.0",
+            'time': 300.03,
+            'matrix': {
+                'constraints': 613,
+                'variables': 428,
+                'nonzeros': 23460
+            },
+            'matrix_post': {
+                'constraints': 613,
+                'variables': 428,
+                'nonzeros': 23535
+            },
+        },
         "gurobi700-app1-2": {
                     'solver': "GUROBI",
                     'time': 46.67,

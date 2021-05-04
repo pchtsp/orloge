@@ -323,7 +323,7 @@ class CPLEX(LogFile):
         }
 
         self.version_regex = [r"Welcome to IBM\(R\) ILOG\(R\) CPLEX\(R\) Interactive Optimizer (\S+)",
-                              r"Log started \((\S+)\)"]
+                              r"Log started \((\S+)\)", r"Version identifier: (\S+)"]
         self.header_log_start = ['Welcome to IBM', "Log started"]
         self.progress_names = ['Node', 'NodesLeft', 'Objective', 'IInf',
                                'BestInteger', 'CutsBestBound', 'ItpNode', 'Gap']
@@ -427,7 +427,7 @@ class CPLEX(LogFile):
         result = self.apply_regex(regex, content_type="float", pos=0)
         if result is not None:
             return result
-        regex = "Total \(root\+branch&cut\) = {0} sec\. \({0} ticks\)".format(self.numberSearch)
+        regex = r"Total \(root\+branch&cut\) =\s+{0} sec\. \({0} ticks\)".format(self.numberSearch)
         return self.apply_regex(regex, content_type="float", pos=0)
 
     def get_nodes(self):
