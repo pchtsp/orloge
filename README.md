@@ -17,7 +17,7 @@ The supported solvers for the time being are: GUROBI, CPLEX and CBC. Specially t
 The basic idea is just to provide a unique interface function like the following:
 
     import orloge as ol
-    ol.get_info_log_solver(path_to_solver_log, solver_name)
+    ol.get_info_solver(path_to_solver_log, solver_name)
 
 This returns a python dictionary with a lot of information from the log (see *Examples* below).
 
@@ -66,7 +66,7 @@ There is also information about the pre-solving phase, the first bound and the f
 ## Examples
 
     import orloge as ol
-    ol.get_info_log_solver('tests/data/cbc298-app1-2.out', 'CBC')
+    ol.get_info_solver('tests/data/cbc298-app1-2.out', 'CBC')
 
 Would produce the following:
 
@@ -100,7 +100,7 @@ Would produce the following:
 And another example, this time using GUROBI:
 
     import orloge as ol
-    ol.get_info_log_solver('tests/data/gurobi700-app1-2.out', 'GUROBI')
+    ol.get_info_solver('tests/data/gurobi700-app1-2.out', 'GUROBI')
 
 Creates the following output:
 
