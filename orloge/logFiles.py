@@ -802,8 +802,8 @@ class CBC(LogFile):
             bound = float(solution[2])
 
         gap_rel = None
-        if objective is not None:
-            gap_rel = abs(objective - bound) / objective * 100
+        if objective is not None and objective != 0:
+            gap_rel = abs(objective - bound) / abs(objective) * 100
 
         return status, objective, bound, gap_rel
 

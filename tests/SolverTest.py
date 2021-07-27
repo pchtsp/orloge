@@ -14,6 +14,16 @@ ALMOST_KEYS = ["best_solution", "best_bound"]
 class SolverTest(unittest.TestCase):
 
     fileinfo = {
+        "cbc_0_objective": {
+            "solver": "CBC",
+            "version": "2.9.0",
+            "time": 0.1,
+            "nodes": 0,
+            "status_code": c.LpStatusSolved,
+            "sol_code": c.LpSolutionOptimal,
+            "best_solution": 0,
+            "best_bound": 0,
+        },
         "cbc298-app1-2": {
             "solver": "CBC",
             "version": "2.9.8",
