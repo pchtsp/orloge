@@ -1,0 +1,65 @@
+Welcome to the CBC MILP Solver 
+Version: 2.9.0 
+Build Date: Feb 12 2015 
+
+command line - C:\Users\ebongo\AppData\Local\Programs\Python\Python38\lib\site-packages\pulp\apis\..\solverdir\cbc\win\64\cbc.exe C:\Users\ebongo\AppData\Local\Temp\79eea847f35942099a1e9be8e0ef60e9-pulp.mps sec 60 ratio 0.01 allow None threads None presolve on strong None gomory on knapsack on probing on branch printingOptions all solution C:\Users\ebongo\AppData\Local\Temp\79eea847f35942099a1e9be8e0ef60e9-pulp.sol (default strategy 1)
+At line 2 NAME          MODEL
+At line 3 ROWS
+At line 991 COLUMNS
+At line 7820 RHS
+At line 8807 BOUNDS
+At line 9602 ENDATA
+Problem MODEL has 986 rows, 963 columns and 4553 elements
+Coin0008I MODEL read with 0 errors
+seconds was changed from 1e+100 to 60
+ratioGap was changed from 0 to 0.01
+String of None is illegal for double parameter allowableGap value remains 0
+String of None is illegal for integer parameter threads value remains 0
+String of None is illegal for integer parameter strongBranching value remains 5
+Option for gomoryCuts changed from ifmove to on
+Option for knapsackCuts changed from ifmove to on
+Continuous objective value is 0 - 0.00 seconds
+Cgl0002I 33 variables fixed
+Cgl0003I 10 fixed, 143 tightened bounds, 165 strengthened rows, 0 substitutions
+Cgl0003I 0 fixed, 36 tightened bounds, 154 strengthened rows, 0 substitutions
+Cgl0003I 0 fixed, 8 tightened bounds, 96 strengthened rows, 0 substitutions
+Cgl0003I 0 fixed, 2 tightened bounds, 61 strengthened rows, 0 substitutions
+Cgl0003I 0 fixed, 0 tightened bounds, 30 strengthened rows, 0 substitutions
+Cgl0003I 9 fixed, 0 tightened bounds, 34 strengthened rows, 0 substitutions
+Cgl0003I 7 fixed, 16 tightened bounds, 19 strengthened rows, 0 substitutions
+Cgl0003I 4 fixed, 3 tightened bounds, 5 strengthened rows, 0 substitutions
+Cgl0003I 0 fixed, 13 tightened bounds, 3 strengthened rows, 0 substitutions
+Cgl0003I 0 fixed, 0 tightened bounds, 17 strengthened rows, 0 substitutions
+Cgl0003I 0 fixed, 0 tightened bounds, 8 strengthened rows, 0 substitutions
+Cgl0004I processed model has 420 rows, 365 columns (337 integer (145 of which binary)) and 2273 elements
+Cutoff increment increased from 1e-005 to 0.9999
+Cbc0038I Initial state - 0 integers unsatisfied sum - 2.77556e-015
+Cbc0038I Solution found of 0
+Cbc0038I Relaxing continuous gives 0
+Cbc0038I Cleaned solution of 0
+Cbc0038I Before mini branch and bound, 337 integers at bound fixed and 11 continuous of which 2 were internal integer and 0 internal continuous
+Cbc0038I Mini branch and bound did not improve solution (0.00 seconds)
+Cbc0038I After 0.00 seconds - Feasibility pump exiting with objective of 0 - took 0.00 seconds
+Cbc0012I Integer solution of 0 found by feasibility pump after 0 iterations and 0 nodes (0.00 seconds)
+Cbc0001I Search completed - best objective 0, took 0 iterations and 0 nodes (0.00 seconds)
+Cbc0035I Maximum depth 0, 0 variables fixed on reduced cost
+Cuts at root node changed objective from 0 to 0
+Probing was tried 0 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)
+Gomory was tried 0 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)
+Knapsack was tried 0 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)
+Clique was tried 0 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)
+MixedIntegerRounding2 was tried 0 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)
+FlowCover was tried 0 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)
+TwoMirCuts was tried 0 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)
+
+Result - Optimal solution found
+
+Objective value:                0.00000000
+Enumerated nodes:               0
+Total iterations:               0
+Time (CPU seconds):             0.10
+Time (Wallclock seconds):       0.10
+
+Option for printingOptions changed from normal to all
+Total time (CPU seconds):       0.10   (Wallclock seconds):       0.10
+

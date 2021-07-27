@@ -2,15 +2,15 @@
 
 from setuptools import setup
 
-packages = ['orloge']
-requirementslist = ['requirements.txt']
+packages = ["orloge"]
+requirementslist = ["requirements.txt"]
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 required = []
 for r in requirementslist:
-    with open(r, 'r') as requirements:
+    with open(r, "r") as requirements:
         required.append(requirements.read().splitlines())
 
 
@@ -20,7 +20,7 @@ kwargs = {
     "packages": packages,
     "description": "OR log extractor",
     "long_description": long_description,
-    'long_description_content_type': "text/markdown",
+    "long_description_content_type": "text/markdown",
     "author": "Franco Peschiera",
     "maintainer": "Franco Peschiera",
     "author_email": "pchtsp@gmail.com",
@@ -34,7 +34,7 @@ kwargs = {
         "Topic :: Software Development",
         "Topic :: Software Development :: Libraries",
         "Topic :: Software Development :: Libraries :: Python Modules",
-    ]
+    ],
 }
 
 setup(**kwargs)
