@@ -617,7 +617,7 @@ class GUROBI(LogFile):
         return self.apply_regex(regex, content_type="int")
 
     def get_stats(self):
-        regex = r"{1}( \(.*\))?\nBest objective ({0}|-), best bound ({0}|-), gap ({0}|-)".format(
+        regex = r"{1}( \(.*\))?\n(Warning:.*\n)?Best objective ({0}|-), best bound ({0}|-), gap ({0}|-)".format(
             self.numberSearch, self.wordSearch
         )
         # content_type = ['', '', 'float', 'float', 'float']
@@ -627,7 +627,7 @@ class GUROBI(LogFile):
 
         status = solution[0]
         objective, bound, gap_rel = [
-            float(solution[pos]) if solution[pos] != "-" else None for pos in [2, 4, 6]
+            float(solution[pos]) if solution[pos] != "-" else None for pos in [3, 5, 7]
         ]
         return status, objective, bound, gap_rel
 

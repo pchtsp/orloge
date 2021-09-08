@@ -1,0 +1,44 @@
+Gurobi 9.1.2 (linux64, gurobi_cl) logging started Tue Sep  7 13:55:23 2021
+
+Academic license - for non-commercial use only - expires 2021-11-05
+Using license file /home/vepain/gurobi.lic
+Set parameter LogFile to value tests/longest_path/solver_gurobi_gat.log
+
+Gurobi Optimizer version 9.1.2 build v9.1.2rc0 (linux64)
+Copyright (c) 2021, Gurobi Optimization, LLC
+
+Read LP format model from file /tmp/037e4e7ce19f41e68947cd514fd009ba-pulp.lp
+Reading time = 0.01 seconds
+OBJ: 3939 rows, 2656 columns, 9894 nonzeros
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+Optimize a model with 3939 rows, 2656 columns and 9894 nonzeros
+Model fingerprint: 0xa3b7c9e3
+Variable types: 816 continuous, 1840 integer (1326 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 2e+06]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 2e+06]
+  RHS range        [1e+00, 5e+03]
+Presolve removed 1741 rows and 1255 columns
+Presolve time: 0.05s
+Presolved: 2198 rows, 1401 columns, 6851 nonzeros
+Variable types: 519 continuous, 882 integer (492 binary)
+Found heuristic solution: objective 858381.00000
+
+Root relaxation: cutoff, 1702 iterations, 0.06 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0     cutoff    0      858381.000 858381.000  0.00%     -    0s
+
+Explored 0 nodes (1702 simplex iterations) in 0.12 seconds
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 858381 
+
+Optimal solution found (tolerance 1.00e-04)
+Warning: max constraint violation (1.1887e-06) exceeds tolerance
+Best objective 8.583810000000e+05, best bound 8.583810000000e+05, gap 0.0000%
+
+Wrote result file '/tmp/037e4e7ce19f41e68947cd514fd009ba-pulp.sol'

@@ -381,6 +381,17 @@ class SolverTest(unittest.TestCase):
             "matrix": {"constraints": 613, "variables": 428, "nonzeros": 23460},
             "matrix_post": {"constraints": 613, "variables": 428, "nonzeros": 23535},
         },
+        "gurobi912-issue7": {
+            "solver": "GUROBI",
+            "time": 0.12,
+            "nodes": 0,
+            "status_code": c.LpStatusSolved,
+            "sol_code": c.LpSolutionOptimal,
+            "matrix": {"constraints": 3939, "variables": 2656, "nonzeros": 9894},
+            "matrix_post": {"constraints": 2198, "variables": 1401, "nonzeros": 6851},
+            "best_solution": 858381,
+            "best_bound": 858381,
+        },
         "gurobi700-app1-2": {
             "solver": "GUROBI",
             "time": 46.67,
