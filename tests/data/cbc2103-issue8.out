@@ -1,0 +1,20 @@
+Welcome to the CBC MILP Solver 
+Version: 2.10.3 
+Build Date: Dec 15 2019 
+
+command line - /home/vepain/Documents/Enseignements/ro_recherche_operationnelle/TP/.venv_39/lib/python3.9/site-packages/pulp/apis/../solverdir/cbc/linux/64/cbc /tmp/07c96077d3cf41a984ea75769ec57f9d-pulp.mps branch printingOptions all solution /tmp/07c96077d3cf41a984ea75769ec57f9d-pulp.sol (default strategy 1)
+At line 2 NAME          MODEL
+At line 3 ROWS
+At line 9 COLUMNS
+At line 28 RHS
+At line 33 BOUNDS
+At line 34 ENDATA
+Problem MODEL has 4 rows, 4 columns and 14 elements
+Coin0008I MODEL read with 0 errors
+Presolve 4 (0) rows, 4 (0) columns and 14 (0) elements
+0  Obj 0 Primal inf 7.0999996 (4)
+2  Obj 90
+Optimal - objective value 90
+Optimal objective 90 - 2 iterations time 0.002
+Option for printingOptions changed from normal to all
+Total time (CPU seconds):       0.00   (Wallclock seconds):       0.00

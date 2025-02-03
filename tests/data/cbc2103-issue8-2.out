@@ -1,0 +1,39 @@
+Welcome to the CBC MILP Solver 
+Version: 2.10.3 
+Build Date: Dec 15 2019 
+
+command line - /home/vepain/Documents/Enseignements/ro_recherche_operationnelle/TP/.venv_39/lib/python3.9/site-packages/pulp/apis/../solverdir/cbc/linux/64/cbc /tmp/6a7df26d2eb949f39afc9b651ba3a2fe-pulp.mps max branch printingOptions all solution /tmp/6a7df26d2eb949f39afc9b651ba3a2fe-pulp.sol (default strategy 1)
+At line 2 NAME          MODEL
+At line 3 ROWS
+At line 14 COLUMNS
+At line 60 RHS
+At line 70 BOUNDS
+At line 80 ENDATA
+Problem MODEL has 9 rows, 9 columns and 18 elements
+Coin0008I MODEL read with 0 errors
+Continuous objective value is 32 - 0.00 seconds
+Cgl0004I processed model has 7 rows, 9 columns (9 integer (0 of which binary)) and 15 elements
+Cutoff increment increased from 1e-05 to 0.9999
+Cbc0012I Integer solution of -32 found by DiveCoefficient after 0 iterations and 0 nodes (0.00 seconds)
+Cbc0001I Search completed - best objective -32, took 0 iterations and 0 nodes (0.00 seconds)
+Cbc0035I Maximum depth 0, 0 variables fixed on reduced cost
+Cuts at root node changed objective from -32 to -32
+Probing was tried 0 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)
+Gomory was tried 0 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)
+Knapsack was tried 0 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)
+Clique was tried 0 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)
+MixedIntegerRounding2 was tried 0 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)
+FlowCover was tried 0 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)
+TwoMirCuts was tried 0 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)
+ZeroHalf was tried 0 times and created 0 cuts of which 0 were active after adding rounds of cuts (0.000 seconds)
+
+Result - Optimal solution found
+
+Objective value:                32.00000000
+Enumerated nodes:               0
+Total iterations:               0
+Time (CPU seconds):             0.00
+Time (Wallclock seconds):       0.00
+
+Option for printingOptions changed from normal to all
+Total time (CPU seconds):       0.00   (Wallclock seconds):       0.00

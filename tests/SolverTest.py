@@ -14,6 +14,24 @@ ALMOST_KEYS = ["best_solution", "best_bound"]
 class SolverTest(unittest.TestCase):
 
     fileinfo = {
+        # "cbc2103-issue8": {
+        #     "solver": "CBC",
+        #     "version": "2.10.3",
+        #     "time": 0,
+        #     "status_code": c.LpStatusSolved,
+        #     "sol_code": c.LpSolutionOptimal,
+        #     "best_solution": 90,
+        #     "best_bound": 90,
+        # },
+        # "cbc2103-issue8-2": {
+        #     "solver": "CBC",
+        #     "version": "2.10.3",
+        #     "time": 0,
+        #     "status_code": c.LpStatusSolved,
+        #     "sol_code": c.LpSolutionOptimal,
+        #     "best_solution": 32,
+        #     "best_bound": 32,
+        # },
         "cbc_0_objective": {
             "solver": "CBC",
             "version": "2.9.0",
@@ -381,6 +399,17 @@ class SolverTest(unittest.TestCase):
             "matrix": {"constraints": 613, "variables": 428, "nonzeros": 23460},
             "matrix_post": {"constraints": 613, "variables": 428, "nonzeros": 23535},
         },
+        # "gurobi912-issue8": {
+        #     "solver": "GUROBI",
+        #     "time": 0,
+        #     "nodes": 0,
+        #     "status_code": c.LpStatusSolved,
+        #     "sol_code": c.LpSolutionOptimal,
+        #     "matrix": {"constraints": 4, "variables": 4, "nonzeros": 14},
+        #     "matrix_post": {"constraints": 4, "variables": 4, "nonzeros": 14},
+        #     "best_solution": 90,
+        #     "best_bound": 90,
+        # },
         "gurobi912-issue7": {
             "solver": "GUROBI",
             "time": 0.12,

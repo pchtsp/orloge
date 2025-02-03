@@ -1,0 +1,31 @@
+Gurobi 9.1.2 (linux64, gurobi_cl) logging started Wed Sep  8 18:28:59 2021
+
+Academic license - for non-commercial use only - expires 2021-11-05
+Using license file /home/vepain/gurobi.lic
+Set parameter LogFile to value ./CBC_simple_ex.log
+
+Gurobi Optimizer version 9.1.2 build v9.1.2rc0 (linux64)
+Copyright (c) 2021, Gurobi Optimization, LLC
+
+Read LP format model from file /tmp/ab4c77a23d094b84b3ea1d9e7032db87-pulp.lp
+Reading time = 0.00 seconds
+Totat_cost: 4 rows, 4 columns, 14 nonzeros
+Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
+Optimize a model with 4 rows, 4 columns and 14 nonzeros
+Model fingerprint: 0xf5d9a7ca
+Coefficient statistics:
+  Matrix range     [1e+00, 5e+02]
+  Objective range  [2e+01, 8e+01]
+  Bounds range     [0e+00, 0e+00]
+  RHS range        [6e+00, 5e+02]
+Presolve time: 0.00s
+Presolved: 4 rows, 4 columns, 14 nonzeros
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    0.0000000e+00   1.512500e+02   0.000000e+00      0s
+       2    9.0000000e+01   0.000000e+00   0.000000e+00      0s
+
+Solved in 2 iterations and 0.00 seconds
+Optimal objective  9.000000000e+01
+
+Wrote result file '/tmp/ab4c77a23d094b84b3ea1d9e7032db87-pulp.sol'
