@@ -6,20 +6,20 @@ jobs:
   build-n-publish:
     name: Build and publish Python 🐍 distributions 📦 to PyPI
     runs-on: ubuntu-18.04
+    permissions:
+      id-token: write
     steps:
     - uses: actions/checkout@master
     - name: Set up Python 3.7
       uses: actions/setup-python@v1
       with:
-        python-version: 3.7
-    - name: Install wheel
-      run: >-
-        python -m
-        pip install
-        wheel
-        --user
-    - name: Build a binary wheel and a source tarball
-      run: python setup.py sdist bdist_wheel
+        python-version: 3.12
+    - name: Install uv and set the python version
+      uses: astral-sh/setup-uv@v5
+      with:
+        python-version: 3.12
+    - name: Build a distribution
+      run: uv build
     - name: Publish distribution 📦 to Test PyPI
       if: startsWith(github.event.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master

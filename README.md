@@ -33,7 +33,7 @@ or, for the development version:
 
 Run the command 
     
-    python -m unittest test
+     python3 -m unittest tests.SolverTest
 
  if the output says OK, all tests were passed.
 

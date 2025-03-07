@@ -1,0 +1,25 @@
+[project]
+name = "orloge"
+version = "0.18.1"
+description = "OR log extractor"
+requires-python = ">=3.10"
+dependencies = ["pandas"]
+authors= [{name= "Franco Peschiera", email= "pchtsp@gmail.com"}]
+maintainers= [{name= "Franco Peschiera", email= "pchtsp@gmail.com"}]
+readme='README.md'
+keywords= ["Mathematical", "Optimization", "solver", "log", "parser"]
+classifiers= [
+    "Programming Language :: Python",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+urls= {source= "https://github.com/pchtsp/orloge", download="https://github.com/pchtsp/orloge/archive/master.zip"}
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# This is a workaround for https://github.com/astral-sh/uv/issues/9513
+license-files = []
