@@ -834,10 +834,7 @@ class SolverTest(unittest.TestCase):
         for filename, contents in self.fileinfo.items():
             file = self.getFileName(filename)
             solver = contents["solver"]
-            data = ol.logFiles.get_info_solver(file, solver)
-            # a = data['progress'].to_dict(orient='split')
-            # a.pop('index', None)
-            # a['data'][0]
+            data = ol.get_info_solver(file, solver)
             for key, value in contents.items():
                 if key not in data:
                     print("not checking: {} in {}".format(key, filename))
@@ -850,7 +847,8 @@ class SolverTest(unittest.TestCase):
                 else:
                     self.assertEqual(data[key], value, msg=msg)
 
-    def getFileName(self, basename):
+    @staticmethod
+    def getFileName(basename):
         return os.path.join(DATADIR, "{}.{}".format(basename, "out"))
 
 

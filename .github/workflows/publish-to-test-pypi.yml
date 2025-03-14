@@ -5,12 +5,10 @@ on: push
 jobs:
   build-n-publish:
     name: Build and publish Python 🐍 distributions 📦 to PyPI
-    runs-on: ubuntu-18.04
-    permissions:
-      id-token: write
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - name: Set up Python 3.7
+    - name: Set up Python 3.12
       uses: actions/setup-python@v1
       with:
         python-version: 3.12
