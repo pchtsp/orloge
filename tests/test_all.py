@@ -14,6 +14,28 @@ ALMOST_KEYS = ["best_solution", "best_bound"]
 class SolverTest(unittest.TestCase):
 
     fileinfo = {
+        "93_01.txt": {
+            "solver": "CPSAT",
+            "version": "v9.3.10497",
+            "time": 3.5908,
+            "nodes": 0,
+            "status_code": c.LpStatusSolved,
+            "sol_code": c.LpSolutionOptimal,
+            "best_solution": 15,
+            "best_bound": 15,
+            "status": "OPTIMAL",
+        },
+        "910_01.txt": {
+            "solver": "CPSAT",
+            "version": "v9.10.4067",
+            "time": 30.4515,
+            "nodes": 0,
+            "status_code": c.LpStatusSolved,
+            "sol_code": c.LpSolutionIntegerFeasible,
+            "best_solution": 1450,
+            "best_bound": 1515,
+            "status": "FEASIBLE",
+        },
         "cbc_0_objective": {
             "solver": "CBC",
             "version": "2.9.0",
@@ -374,7 +396,7 @@ class SolverTest(unittest.TestCase):
             "best_solution": None,
             "best_bound": None,
         },
-        "trivial.True.True.cplex.300": {
+        "trivial_cplex_300": {
             "solver": "CPLEX",
             "version": "20.1.0.0",
             "time": 300.03,
@@ -849,7 +871,10 @@ class SolverTest(unittest.TestCase):
 
     @staticmethod
     def getFileName(basename):
-        return os.path.join(DATADIR, "{}.{}".format(basename, "out"))
+        basename, ext = os.path.splitext(basename)
+        if ext == "":
+            ext = ".out"
+        return os.path.join(DATADIR, f"{basename}{ext}")
 
 
 if __name__ == "__main__":
