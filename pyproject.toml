@@ -1,9 +1,9 @@
 [project]
 name = "orloge"
-version = "0.18.1"
+version = "0.18.3"
 description = "OR log extractor"
 requires-python = ">=3.10"
-dependencies = ["pandas", "cpsat_log_parser @ https://github.com/pchtsp/CP-SAT-Log-Analyzer.git"]
+dependencies = ["pandas", "cpsat-logutils"]
 authors= [{name= "Franco Peschiera", email= "pchtsp@gmail.com"}]
 maintainers= [{name= "Franco Peschiera", email= "pchtsp@gmail.com"}]
 readme='README.md'
