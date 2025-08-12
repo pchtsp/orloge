@@ -1,5 +1,9 @@
 ## Orloge
-[![Build Status](https://travis-ci.org/pchtsp/orloge.svg?branch=master)](https://travis-ci.org/pchtsp/orloge)
+[![PyPI version](https://badge.fury.io/py/orloge.svg)](https://badge.fury.io/py/orloge)
+![Repo Size](https://img.shields.io/github/repo-size/pchtsp/orloge)
+[![PEP8](https://img.shields.io/badge/code%20style-pep8-orange.svg)](https://www.python.org/dev/peps/pep-0008/)
+[![Repo Status](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
 ## What and why

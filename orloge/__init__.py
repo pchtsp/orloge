@@ -1,9 +1,10 @@
-__all__ = ["base", "cplex", "gurobi", "cbc", "cpsat"]
+__all__ = ["LogFile", "CPLEX", "GUROBI", "CBC", "CPSAT"]
 
 from .cplex import CPLEX
 from .gurobi import GUROBI
 from .cbc import CBC
 from .cpsat import CPSAT
+from .base import LogFile
 
 __map = dict(CPLEX=CPLEX, GUROBI=GUROBI, CBC=CBC, CPSAT=CPSAT)
 
