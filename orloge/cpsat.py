@@ -44,7 +44,7 @@ class CPSAT(LogFile):
         - RemCons: The number of remaining constraints after the event.
         """
         progress_block = self.my_parser.get_block_of_type_or_none(SearchProgressBlock)
-        events = progress_block._parse_events()
+        events = progress_block.get_events()
         gap = obj = bound = None
         cons = new_cons = var = new_var = None
         my_table = []

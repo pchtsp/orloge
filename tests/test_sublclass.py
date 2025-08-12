@@ -5,7 +5,6 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import orloge as ol
-import orloge.constants as c
 
 DATADIR = os.path.join(os.path.dirname(__file__), "data")
 ALMOST_KEYS = ["best_solution", "best_bound"]
@@ -36,7 +35,7 @@ class SolverTest(unittest.TestCase):
 
                 return pd.DataFrame()
 
-        my_log = MyLog(path="PATH_TO_MY_LOG_FILE")
+        my_log = MyLog(path=None, content="PATH_TO_MY_LOG_FILE")
         my_log.get_log_info()
 
 
