@@ -1,9 +1,9 @@
 [project]
 name = "orloge"
-version = "0.18.3"
+version = "1.0.0"
 description = "OR log extractor"
-requires-python = ">=3.10"
-dependencies = ["pandas", "cpsat-logutils"]
+requires-python = ">=3.12"
+dependencies = ["cpsat-logutils>=1.0.0"]
 authors= [{name= "Franco Peschiera", email= "pchtsp@gmail.com"}]
 maintainers= [{name= "Franco Peschiera", email= "pchtsp@gmail.com"}]
 readme='README.md'
@@ -25,4 +25,7 @@ build-backend = "setuptools.build_meta"
 license-files = []
 
 [dependency-groups]
-dev = ["black"]
+dev = [
+    "ruff>=0.16.5",
+    "ty>=0.0.77",
+]

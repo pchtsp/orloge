@@ -1,6 +1,7 @@
-import unittest
 import os
 import sys
+import unittest
+from typing import ClassVar
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -12,11 +13,10 @@ ALMOST_KEYS = ["best_solution", "best_bound"]
 
 
 class SolverTest(unittest.TestCase):
-
-    fileinfo = {
+    fileinfo: ClassVar[dict] = {
         "93_01.txt": {
             "solver": "CPSAT",
-            "version": "v9.3.10497",
+            "version": "9.3.10497",
             "time": 3.5908,
             "nodes": 0,
             "status_code": c.LpStatusSolved,
@@ -27,7 +27,7 @@ class SolverTest(unittest.TestCase):
         },
         "910_01.txt": {
             "solver": "CPSAT",
-            "version": "v9.10.4067",
+            "version": "9.10.4067",
             "time": 30.4515,
             "nodes": 0,
             "status_code": c.LpStatusSolved,
@@ -859,11 +859,9 @@ class SolverTest(unittest.TestCase):
             data = ol.get_info_solver(file, solver)
             for key, value in contents.items():
                 if key not in data:
-                    print("not checking: {} in {}".format(key, filename))
+                    print(f"not checking: {key} in {filename}")
                     continue
-                msg = "{0} has {1} as {2}, should be {3}".format(
-                    filename, data[key], key, value
-                )
+                msg = f"{filename} has {data[key]} as {key}, should be {value}"
                 if key in ALMOST_KEYS:
                     self.assertAlmostEqual(data[key], value, delta=1e-1, msg=msg)
                 else:

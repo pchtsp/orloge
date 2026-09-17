@@ -1,16 +1,63 @@
 # /usr/bin/python3
 import re
-import pandas as pd
-import numpy as np
+from collections.abc import Sequence
+from dataclasses import dataclass
+
 from .constants import (
-    LpSolutionOptimal,
     LpSolutionIntegerFeasible,
     LpSolutionNoSolutionFound,
+    LpSolutionOptimal,
     solver_to_solution,
 )
 
 
-class LogFile(object):
+@dataclass
+class MIPProgressRow:
+    """
+    One row of a MIP solver's branch-and-bound progress table.
+    Shared by CBC (used directly), and by GUROBI/CPLEX/CPSAT (subclassed
+    with extra solver-specific columns).
+    """
+
+    Node: int | None = None
+    NodesLeft: int | None = None
+    BestInteger: float | None = None
+    CutsBestBound: float | str | None = None
+    Time: float | None = None
+
+
+_LEADING_NUMBER = re.compile(r"^([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)")
+_INT_FIELDS = {"Node", "NodesLeft", "Depth", "IInf", "ItpNode"}
+_FLOAT_FIELDS = {"BestInteger", "Gap", "Time"}
+_FLOAT_OR_TEXT_FIELDS = {"Objective", "CutsBestBound"}
+
+
+def _cast_progress_field(name: str, value: str | None):
+    """
+    Best-effort cast of a raw regex-captured progress cell.
+    Numeric-only fields fall back to None when unparseable (never a guess);
+    Objective/CutsBestBound keep the raw text when it's genuinely descriptive
+    (e.g. "infeasible", "Cuts: 5") instead of losing it.
+    """
+    if value is None or value == "":
+        # some solver regexes capture an intentionally-empty group (rather
+        # than leaving the group unmatched) when a column has no value on a
+        # given row — that's "nothing captured", not descriptive text.
+        return None
+    match = _LEADING_NUMBER.match(value)
+    try:
+        if name in _INT_FIELDS:
+            return int(float(match.group(1))) if match else None
+        if name in _FLOAT_FIELDS:
+            return float(match.group(1)) if match else None
+        if name in _FLOAT_OR_TEXT_FIELDS:
+            return float(match.group(1)) if match else value
+    except (TypeError, ValueError):
+        return None
+    return value
+
+
+class LogFile:
     """
     This represents the log files that solvers return.
     We implement functions to get different information
@@ -29,17 +76,24 @@ class LogFile(object):
         self.path = path
         self.content = content
         self.number = r"-?[\de\.\+]+"
-        self.numberSearch = r"({})".format(self.number)
+        self.numberSearch = rf"({self.number})"
         self.wordSearch = r"([\w, -]+)"
 
         self.solver_status_map = {}
         self.version_regex = ""
         self.progress_filter = ""
         self.progress_names = []
+        self.progress_row_cls = MIPProgressRow
         self.options = options
 
     def apply_regex(
-        self, regex, content_type=None, first=True, pos=None, num=None, **kwargs
+        self,
+        regex,
+        content_type: str | list[str] | None = None,
+        first=True,
+        pos=None,
+        num=None,
+        **kwargs,
     ):
         """
         regex is the regular expression to apply to the file contents.
@@ -68,15 +122,13 @@ class LogFile(object):
         func = {"float": float, "int": int, "str": str}
         if pos is not None:
             value = possible_tuple[pos]
-            if content_type in func:
+            if isinstance(content_type, str) and content_type in func:
                 return func[content_type](value)
             else:
                 return possible_tuple[pos]
         if content_type is None:
             return possible_tuple
-        if type(content_type) is not list:
-            return [func[content_type](val) for val in possible_tuple]
-        else:
+        if isinstance(content_type, list):
             # each one has its own type.
             # by default, we use strings
             ct = ["str" for r in possible_tuple]
@@ -84,71 +136,58 @@ class LogFile(object):
                 if _c in func:
                     ct[i] = _c
             return [func[ct[i]](val) for i, val in enumerate(possible_tuple)]
+        return [func[content_type](val) for val in possible_tuple]
 
-    def get_first_relax(self, progress) -> float | None:
+    def get_first_relax(self, progress: Sequence[MIPProgressRow]) -> float | None:
         """
         scans the progress table for the initial relaxed solution
         :return: relaxation
         """
-        bestBounds = progress.CutsBestBound[~progress.CutsBestBound.isna()]
-
-        df_filter = bestBounds.apply(
-            lambda x: re.search(r"^\s*{}$".format(self.number), x) is not None
-        )
-        if len(df_filter) > 0 and any(df_filter):
-            return float(bestBounds[df_filter].iloc[0])
+        for row in progress:
+            if isinstance(row.CutsBestBound, float):
+                return row.CutsBestBound
         return None
 
-    def get_first_solution(self, progress):
+    def get_first_solution(self, progress: Sequence[MIPProgressRow]) -> dict | None:
         """
         scans the progress table for the initial integer solution
         :param progress: table with progress
         :return: dictionary with information on the moment of finding integer solution
         """
-        vars_extract = ["Node", "NodesLeft", "BestInteger", "CutsBestBound"]
-        df_filter = progress.BestInteger.fillna("").str.match(
-            r"^\s*{}$".format(self.number)
-        )
-        # HACK: take out CBCs magic number (1e+50 for no integer solution found)
-        df_filter_1e50 = progress.BestInteger.fillna("").str.match(r"^\s*1e\+50$")
-        df_filter = np.all([df_filter, ~df_filter_1e50], axis=0)
-        if len(df_filter) > 0 and any(df_filter):
-            for col in vars_extract:
-                floatSearch = r"[+-]?[\d]+(\.[\d]+)?([Ee][+-]?[\d]+)?"
-                regex = "^({}).*$".format(floatSearch)
-                progress[col] = progress[col].str.extract(regex)[[0]]
-                # progress[col] = progress[col].str.replace('(?!{})'.format(self.number), '')
-            return pd.to_numeric(progress[vars_extract][df_filter].iloc[0]).to_dict()
+        for row in progress:
+            # HACK: take out CBCs magic number (1e+50 for no integer solution found)
+            if isinstance(row.BestInteger, float) and row.BestInteger != 1e50:
+                return {
+                    "Node": row.Node,
+                    "NodesLeft": row.NodesLeft,
+                    "BestInteger": row.BestInteger,
+                    "CutsBestBound": (
+                        row.CutsBestBound
+                        if isinstance(row.CutsBestBound, float)
+                        else None
+                    ),
+                }
         return None
 
     @staticmethod
-    def get_results_after_cuts(progress):
+    def get_results_after_cuts(progress: Sequence[MIPProgressRow]):
         """
         gets relaxed and integer solutions after the cuts phase has ended.
         :return: tuple of length two
         """
-        df_filter = np.all(
-            (
-                progress.Node.str.match(r"^\*?H?\s*0"),
-                progress.NodesLeft.str.match(r"^\+?H?\s*[012]"),
-            ),
-            axis=0,
-        )
+        matches = [
+            row for row in progress if row.Node == 0 and row.NodesLeft in (0, 1, 2)
+        ]
 
         # in case we have some progress after the cuts, we get those values
         # if not, we return None to later fill with best_solution and best_bound
-        if not np.any(df_filter):
+        if not matches:
             return None, None
-        sol_value = progress.BestInteger[df_filter].iloc[-1]
-        relax_value = progress.CutsBestBound[df_filter].iloc[-1]
-
-        # finally, we return the found values
-        if sol_value and re.search(r"^\s*-?\d", sol_value):
-            sol_value = float(sol_value)
-        if relax_value and re.search(r"^\s*-?\d", relax_value):
-            relax_value = float(relax_value)
-        else:
-            relax_value = None
+        last = matches[-1]
+        sol_value = last.BestInteger
+        relax_value = (
+            last.CutsBestBound if isinstance(last.CutsBestBound, float) else None
+        )
 
         return relax_value, sol_value
 
@@ -173,7 +212,7 @@ class LogFile(object):
         if self.options.get("get_progress", True):
             progress = self.get_progress()
         else:
-            progress = pd.DataFrame()
+            progress = []
         first_relax = first_solution = None
         cut_info = self.get_cuts_dict(progress, bound, objective)
 
@@ -203,7 +242,9 @@ class LogFile(object):
             "nodes": nodes,
         }
 
-    def get_cuts_dict(self, progress, best_bound, best_solution) -> dict:
+    def get_cuts_dict(
+        self, progress: Sequence[MIPProgressRow], best_bound, best_solution
+    ) -> dict | None:
         """
         builds a dictionary with all information regarding to the applied cuts
         :return: a dictionary
@@ -226,7 +267,7 @@ class LogFile(object):
             "best_solution": sol_after_cuts,
         }
 
-    def get_matrix_dict(self, post=False) -> dict:
+    def get_matrix_dict(self, post=False) -> dict | None:
         """
         wrapper to both matrix parsers (before and after preprocess)
         :return: a dictionary with three elements or None
@@ -257,7 +298,7 @@ class LogFile(object):
     def get_stats(self):
         return None, None, None, None
 
-    def get_status_codes(self, status, obj) -> tuple[int, int]:
+    def get_status_codes(self, status, obj) -> tuple[int | None, int | None]:
         """
         converts the status string into a solver code and a solution code
         to standardize the output among solvers
@@ -287,23 +328,41 @@ class LogFile(object):
     def get_nodes(self) -> int | None:
         return None
 
-    def get_root_time(self) -> float:
+    def get_root_time(self) -> float | None:
         return None
 
     def process_line(self, line):
         return None
 
-    def get_progress(self) -> pd.DataFrame:
+    def get_progress(self) -> Sequence[MIPProgressRow]:
         """
-        :return: pandas dataframe with 8 columns
+        Parses the solver's branch-and-bound progress table into a list of
+        typed row objects (see MIPProgressRow and its per-solver subclasses).
+        Numeric columns are cast to int/float; a value that can't be trusted
+        as a real number becomes None rather than a guess. Objective and
+        CutsBestBound may instead hold a short descriptive string (e.g.
+        "infeasible", "Cuts: 5") when the solver printed an annotation
+        instead of a number on that row.
+        :return: list of MIPProgressRow (or solver-specific subclass) instances
         """
         lines = self.apply_regex(self.progress_filter, first=False, flags=re.MULTILINE)
         processed = [self.process_line(line) for line in lines]
         processed_clean = [p for p in processed if p is not None]
-        progress = pd.DataFrame(processed_clean)
-        if len(progress):
-            progress.columns = self.progress_names
-        return progress
+        rows = []
+        for p in processed_clean:
+            kwargs = {
+                name: _cast_progress_field(name, val)
+                for name, val in zip(self.progress_names, p)
+            }
+            try:
+                rows.append(self.progress_row_cls(**kwargs))
+            except TypeError:
+                # a line matched process_line's regex but produced a group
+                # count/shape the row class doesn't expect (e.g. future solver
+                # log format drift) — skip just this row rather than losing
+                # the whole file's progress table.
+                continue
+        return rows
 
 
 if __name__ == "__main__":

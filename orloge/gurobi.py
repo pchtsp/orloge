@@ -1,14 +1,24 @@
-from .base import LogFile
+import re
+from dataclasses import dataclass
+
+from .base import LogFile, MIPProgressRow
 from .constants import (
-    LpStatusMemoryLimit,
-    LpStatusSolved,
     LpStatusInfeasible,
+    LpStatusMemoryLimit,
+    LpStatusNotSolved,
+    LpStatusSolved,
     LpStatusTimeLimit,
     LpStatusUnbounded,
-    LpStatusNotSolved,
 )
-import re
-import numpy as np
+
+
+@dataclass
+class GUROBIProgressRow(MIPProgressRow):
+    Objective: float | str | None = None
+    Depth: int | None = None
+    IInf: int | None = None
+    Gap: float | None = None
+    ItpNode: int | None = None
 
 
 class GUROBI(LogFile):
@@ -41,6 +51,7 @@ class GUROBI(LogFile):
             "Time",
         ]
         self.progress_filter = r"(^[\*H]?\s+\d.*$)"
+        self.progress_row_cls = GUROBIProgressRow
 
     def get_cuts(self):
         regex = r"Cutting planes:([\n\s\-\w:]+)Explored"
@@ -49,30 +60,24 @@ class GUROBI(LogFile):
             # if no cuts found, return empty dictionary
             return {}
         cuts = [r for r in result.split("\n") if r != ""]
-        regex = r"\s*{}: {}".format(self.wordSearch, self.numberSearch)
+        regex = rf"\s*{self.wordSearch}: {self.numberSearch}"
         searches = [re.search(regex, v) for v in cuts]
         return {
             s.group(1): int(s.group(2))
             for s in searches
-            if s is not None and s.lastindex >= 2
+            if s is not None and s.lastindex is not None and s.lastindex >= 2
         }
 
     def get_matrix(self):
-        regex = r"Optimize a model with {0} rows, {0} columns and {0} nonzeros".format(
-            self.numberSearch
-        )
+        regex = rf"Optimize a model with {self.numberSearch} rows, {self.numberSearch} columns and {self.numberSearch} nonzeros"
         return self.apply_regex(regex, content_type="int")
 
     def get_matrix_post(self):
-        regex = r"Presolved: {0} rows, {0} columns, {0} nonzeros".format(
-            self.numberSearch
-        )
+        regex = rf"Presolved: {self.numberSearch} rows, {self.numberSearch} columns, {self.numberSearch} nonzeros"
         return self.apply_regex(regex, content_type="int")
 
     def get_stats(self):
-        regex = r"{1}( \(.*\))?\n(Warning:.*\n)?Best objective ({0}|-), best bound ({0}|-), gap ({0}|-)".format(
-            self.numberSearch, self.wordSearch
-        )
+        regex = rf"{self.wordSearch}( \(.*\))?\n(Warning:.*\n)?Best objective ({self.numberSearch}|-), best bound ({self.numberSearch}|-), gap ({self.numberSearch}|-)"
         # content_type = ['', '', 'float', 'float', 'float']
         solution = self.apply_regex(regex)
         if solution is None:
@@ -86,54 +91,38 @@ class GUROBI(LogFile):
 
     def get_cuts_time(self):
         progress = self.get_progress()
-        if not len(progress):
+        if not progress:
             return None
-        df_filter = np.all(
-            (
-                progress.Node.str.match(r"^\*?H?\s*0"),
-                progress.NodesLeft.str.match(r"^\+?H?\s*2"),
-            ),
-            axis=0,
-        )
-
-        cell = progress.Time.iloc[0]
-        if len(df_filter) and any(df_filter):
+        matches = [row for row in progress if row.Node == 0 and row.NodesLeft == 2]
+        if matches:
             # we finished the cuts phase
-            cell = progress.Time[df_filter].iloc[0]
-
-        number = re.search(self.numberSearch, cell).group(1)
-        return float(number)
+            return matches[0].Time
+        return progress[0].Time
 
     def get_lp_presolve(self):
         """
         :return: tuple  of length 3
         """
-        regex = r"Presolve time: {0}s".format(self.numberSearch)
+        regex = rf"Presolve time: {self.numberSearch}s"
         time = self.apply_regex(regex, pos=0, content_type="float")
         if time is None:
             time = None
-        regex = r"Presolve removed {0} rows and {0} columns".format(self.numberSearch)
+        regex = rf"Presolve removed {self.numberSearch} rows and {self.numberSearch} columns"
         result = self.apply_regex(regex, content_type="int")
         if result is None:
             result = None, None
         return {"time": time, "rows": result[0], "cols": result[1]}
 
     def get_time(self):
-        regex = r"Explored {0} nodes \({0} simplex iterations\) in {0} seconds".format(
-            self.numberSearch
-        )
+        regex = rf"Explored {self.numberSearch} nodes \({self.numberSearch} simplex iterations\) in {self.numberSearch} seconds"
         return self.apply_regex(regex, content_type="float", pos=2)
 
     def get_nodes(self):
-        regex = r"Explored {0} nodes \({0} simplex iterations\) in {0} seconds".format(
-            self.numberSearch
-        )
+        regex = rf"Explored {self.numberSearch} nodes \({self.numberSearch} simplex iterations\) in {self.numberSearch} seconds"
         return self.apply_regex(regex, content_type="float", pos=0)
 
     def get_root_time(self):
-        regex = r"Root relaxation: objective {0}, {0} iterations, {0} seconds".format(
-            self.numberSearch
-        )
+        regex = rf"Root relaxation: objective {self.numberSearch}, {self.numberSearch} iterations, {self.numberSearch} seconds"
         return self.apply_regex(regex, pos=2, content_type="float")
 
     def process_line(self, line):
@@ -150,8 +139,8 @@ class GUROBI(LogFile):
             "time",
         ]
         args = {k: self.numberSearch for k in keys}
-        args["gap"] = "({}%)".format(self.number)
-        args["time"] = "({}s)".format(self.number)
+        args["gap"] = f"({self.number}%)"
+        args["time"] = f"({self.number}s)"
 
         if line[0] in ["*", "H"]:
             args["obj"] = "()"
@@ -168,7 +157,7 @@ class GUROBI(LogFile):
         get = re.search(r"\*?\s*\d+\+?\s*\d+\s*(infeasible|cutoff|integral)", line)
         if get is not None:
             state = get.group(1)
-            args["obj"] = "({})".format(state)
+            args["obj"] = f"({state})"
             if state in ["integral"]:
                 pass
             else:

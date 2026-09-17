@@ -1,12 +1,12 @@
-__all__ = ["LogFile", "CPLEX", "GUROBI", "CBC", "CPSAT"]
+__all__ = ["CBC", "CPLEX", "CPSAT", "GUROBI", "LogFile"]
 
+from .base import LogFile
+from .cbc import CBC
 from .cplex import CPLEX
 from .gurobi import GUROBI
-from .cbc import CBC
 from .cpsat import CPSAT
-from .base import LogFile
 
-__map = dict(CPLEX=CPLEX, GUROBI=GUROBI, CBC=CBC, CPSAT=CPSAT)
+__map = {"CPLEX": CPLEX, "GUROBI": GUROBI, "CBC": CBC, "CPSAT": CPSAT}
 
 
 def get_info_solver(path, solver, **options):

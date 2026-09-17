@@ -1,13 +1,13 @@
-from .base import LogFile
+import re
+
+from .base import LogFile, MIPProgressRow
 from .constants import (
-    LpStatusMemoryLimit,
-    LpStatusSolved,
     LpStatusInfeasible,
+    LpStatusNotSolved,
+    LpStatusSolved,
     LpStatusTimeLimit,
     LpStatusUnbounded,
-    LpStatusNotSolved,
 )
-import re
 
 
 class CBC(LogFile):
@@ -32,38 +32,35 @@ class CBC(LogFile):
             "Time",
         ]
         self.progress_filter = r"(^Cbc0010I.*$)"
+        self.progress_row_cls = MIPProgressRow
 
     def get_cuts(self):
         # TODO
         pass
 
     def get_matrix(self):
-        regex = r"Problem .+ has {0} rows, {0} columns and {0} elements".format(
-            self.numberSearch
-        )
+        regex = rf"Problem .+ has {self.numberSearch} rows, {self.numberSearch} columns and {self.numberSearch} elements"
         return self.apply_regex(regex, content_type="int")
 
     def get_matrix_post(self):
         regex = (
-            r"Cgl0004I processed model has {0} rows, {0} columns \(\d+ integer "
-            r"\(\d+ of which binary\)\) and {0} elements".format(self.numberSearch)
+            rf"Cgl0004I processed model has {self.numberSearch} rows, {self.numberSearch} columns \(\d+ integer "
+            rf"\(\d+ of which binary\)\) and {self.numberSearch} elements"
         )
         return self.apply_regex(regex, content_type="int")
 
     def get_stats(self):
 
-        regex = "Result - {}".format(self.wordSearch)
+        regex = f"Result - {self.wordSearch}"
         status = self.apply_regex(regex, pos=0)
         if status is None:
             # no solution found, I still want the status
-            for k in self.solver_status_map.keys():
+            for k in self.solver_status_map:
                 if self.apply_regex(re.escape(k)):
                     return k, None, None, None
         else:
             status = status.strip()
-        regex = r"best objective {0}( \(best possible {0}\))?, took {1} iterations and {1} nodes \({1} seconds\)".format(
-            self.numberSearch, self.number
-        )
+        regex = rf"best objective {self.numberSearch}( \(best possible {self.numberSearch}\))?, took {self.number} iterations and {self.number} nodes \({self.number} seconds\)"
         solution = self.apply_regex(regex)
 
         if solution is None:
@@ -81,7 +78,7 @@ class CBC(LogFile):
             bound = float(solution[2])
 
         gap_rel = None
-        if objective is not None and objective != 0:
+        if objective is not None and objective != 0 and bound is not None:
             gap_rel = abs(objective - bound) / abs(objective) * 100
 
         return status, objective, bound, gap_rel
@@ -95,12 +92,12 @@ class CBC(LogFile):
         return None
 
     def get_time(self):
-        regex = r"Total time \(CPU seconds\):\s*{}".format(self.numberSearch)
+        regex = rf"Total time \(CPU seconds\):\s*{self.numberSearch}"
         stats = self.apply_regex(regex, content_type="float", pos=0)
         return stats
 
     def get_nodes(self):
-        regex = r"Enumerated nodes:\s*{}".format(self.numberSearch)
+        regex = rf"Enumerated nodes:\s*{self.numberSearch}"
         return self.apply_regex(regex, content_type="int", pos=0)
 
     def get_root_time(self):

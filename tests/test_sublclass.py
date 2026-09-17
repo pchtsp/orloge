@@ -1,6 +1,6 @@
-import unittest
 import os
 import sys
+import unittest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -21,7 +21,7 @@ class SolverTest(unittest.TestCase):
                 # get status, objective, bound, gap_rel
                 return None, None, None, None
 
-            def get_status_codes(self, status, objective):
+            def get_status_codes(self, status, obj):
                 # get status codes of the solver and solution
                 return None, None
 
@@ -30,10 +30,8 @@ class SolverTest(unittest.TestCase):
                 return ""
 
             def get_progress(self):
-                # implement some logic to parse the progress and return a pandas DataFrame
-                import pandas as pd
-
-                return pd.DataFrame()
+                # implement some logic to parse the progress and return a list of rows
+                return []
 
         my_log = MyLog(path=None, content="PATH_TO_MY_LOG_FILE")
         my_log.get_log_info()

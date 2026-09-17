@@ -57,7 +57,7 @@ There are two matrices that are provided. The `matrix` key returns the number of
 
 ### Progress
 
-The `progress` key returns a raw pandas Dataframe with the all the progress information the solver gives. Including the times, the gap, the best bound, the best solution, the iterations, nodes, among other. This table can vary in number of columns between solvers but the names of the columns are normalized so as to have the same name for the same information.
+The `progress` key returns a list of dataclass instances, one per row of the progress table the solver printed while solving. Each row carries the time, gap, best bound, best solution, iterations, nodes, among other columns. The set of columns can vary between solvers, but the names are normalized so the same name always means the same thing: CBC rows are `MIPProgressRow`, GUROBI rows are `GUROBIProgressRow`, and CPLEX rows are `CPLEXProgressRow` (both subclass `MIPProgressRow`, adding their own extra columns); CPSAT rows are the unrelated `CPSATProgressRow`. Numeric columns are parsed to `int`/`float` and become `None` when a value can't be trusted as a real number — except `Objective` and `CutsBestBound`, which can instead hold a short status string (e.g. `"infeasible"`, `"cutoff"`, `"Cuts: 5"`) when the solver printed an annotation instead of a number on that row.
 
 ### Status
 
@@ -76,23 +76,19 @@ Would produce the following:
 
     {'best_bound': -96.111283,
      'best_solution': None,
-     'cut_info': {'best_bound': -210.09571,
-                  'best_solution': 1e+50,
-                  'cuts': None,
-                  'time': None},
+     'cut_info': {},
      'first_relaxed': -210.09571,
-     'first_solution': 1e+50,
+     'first_solution': None,
      'gap': None,
      'matrix': {'constraints': 53467, 'nonzeros': 199175, 'variables': 26871},
      'matrix_post': {'constraints': 26555, 'nonzeros': 195875, 'variables': 13265},
      'nodes': 31867,
      'presolve': None,
-     'progress':       
-     Node NodesLeft BestInteger CutsBestBound     Time
-    0        0         1       1e+50    -210.09571    32.83
-    1      100        11       1e+50    -210.09571   124.49
-    ..     ...       ...         ...           ...      ...
-    [319 rows x 5 columns],
+     'progress': [MIPProgressRow(Node=0, NodesLeft=1, BestInteger=1e+50, CutsBestBound=-210.09571, Time=32.83),
+                  MIPProgressRow(Node=100, NodesLeft=11, BestInteger=1e+50, CutsBestBound=-210.09571, Time=124.49),
+                  ...
+                  # 319 rows total
+                  ],
      'rootTime': None,
      'sol_code': 0,
      'solver': 'CBC',
@@ -118,18 +114,19 @@ Creates the following output:
                            'MIR': 22},
                   'time': 21.0},
      'first_relaxed': -178.94318,
-     'first_solution': -41.0,
-     'gap': 0.0,
+     'first_solution': {'Node': 0, 'NodesLeft': 0, 'BestInteger': -41.0, 'CutsBestBound': -178.94318},
+     'gap': 0,
      'matrix': {'constraints': 53467, 'nonzeros': 199175, 'variables': 26871},
      'matrix_post': {'constraints': 35616, 'nonzeros': 149085, 'variables': 22010},
      'nodes': 526.0,
      'presolve': {'cols': 4861, 'rows': 17851, 'time': 3.4},
-     'progress':    
-     Node NodesLeft   Objective Depth ...  CutsBestBound    Gap ItpNode Time
-    0     0         0  -178.94318     0 ...     -178.94318   336%    None   4s
-    1     0         0  -171.91701     0 ...     -171.91701   319%    None  15s
-    2     0         0  -170.97660     0 ...     -170.97660   317%    None  15s
-    [26 rows x 10 columns],
+     'progress': [GUROBIProgressRow(Node=0, NodesLeft=0, BestInteger=-41.0, CutsBestBound=-178.94318, Time=4.0,
+                                     Objective=-178.94318, Depth=0, IInf=282, Gap=336.0, ItpNode=None),
+                  GUROBIProgressRow(Node=0, NodesLeft=0, BestInteger=-41.0, CutsBestBound=-171.91701, Time=15.0,
+                                     Objective=-171.91701, Depth=0, IInf=268, Gap=319.0, ItpNode=None),
+                  ...
+                  # 26 rows total
+                  ],
      'rootTime': 0.7,
      'sol_code': 1,
      'solver': 'GUROBI',
