@@ -15,14 +15,11 @@ classifiers= [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 urls= {source= "https://github.com/pchtsp/orloge", download="https://github.com/pchtsp/orloge/archive/master.zip"}
+license= {text= "MIT"}
 
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-# This is a workaround for https://github.com/astral-sh/uv/issues/9513
-license-files = []
 
 [dependency-groups]
 dev = [
